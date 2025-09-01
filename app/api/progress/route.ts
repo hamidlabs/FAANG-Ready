@@ -1,0 +1,107 @@
+import { NextResponse } from 'next/server';
+import pool from '@/lib/db';
+
+export async function POST(request: Request) {
+  try {
+    const { lessonId } = await request.json();
+    const client = await pool.connect();
+    
+    // Check if progress exists
+    const existingProgress = await client.query(
+      'SELECT * FROM user_progress WHERE lesson_id = $1',
+      [lessonId]
+    );
+    
+    if (existingProgress.rows.length > 0) {
+      // Toggle completion
+      if (existingProgress.rows[0].completed_at) {
+        // Mark as incomplete
+        await client.query(
+          'UPDATE user_progress SET completed_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE lesson_id = $1',
+          [lessonId]
+        );
+      } else {
+        // Mark as complete
+        await client.query(
+          'UPDATE user_progress SET completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE lesson_id = $1',
+          [lessonId]
+        );
+      }
+    } else {
+      // Create new progress entry as completed
+      await client.query(
+        'INSERT INTO user_progress (lesson_id, completed_at, confidence_level) VALUES ($1, CURRENT_TIMESTAMP, 3)',
+        [lessonId]
+      );
+    }
+    
+    // Update user stats
+    await updateUserStats(client);
+    
+    client.release();
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Database error:', error);
+    return NextResponse.json({ error: 'Failed to update progress' }, { status: 500 });
+  }
+}
+
+async function updateUserStats(client: any) {
+  // Count completed lessons
+  const completedCount = await client.query(
+    'SELECT COUNT(*) FROM user_progress WHERE completed_at IS NOT NULL'
+  );
+  
+  // Calculate total hours (estimate based on completed lessons)
+  const hoursResult = await client.query(`
+    SELECT SUM(l.estimated_hours) as total_hours
+    FROM lessons l
+    JOIN user_progress up ON l.id = up.lesson_id
+    WHERE up.completed_at IS NOT NULL
+  `);
+  
+  // Calculate streak (simplified - consecutive days with completions)
+  const today = new Date().toISOString().split('T')[0];
+  const recentActivity = await client.query(`
+    SELECT DATE(completed_at) as completion_date, COUNT(*) as lessons_completed
+    FROM user_progress 
+    WHERE completed_at IS NOT NULL 
+    GROUP BY DATE(completed_at)
+    ORDER BY completion_date DESC
+    LIMIT 30
+  `);
+  
+  let currentStreak = 0;
+  const dates = recentActivity.rows.map(row => row.completion_date);
+  
+  if (dates.length > 0) {
+    const todayDate = new Date(today);
+    let checkDate = new Date(todayDate);
+    
+    for (let i = 0; i < dates.length; i++) {
+      const activityDate = new Date(dates[i]);
+      if (activityDate.toDateString() === checkDate.toDateString()) {
+        currentStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+  
+  // Update stats
+  await client.query(`
+    UPDATE user_stats SET 
+      total_lessons_completed = $1,
+      total_hours_studied = $2,
+      current_streak = $3,
+      longest_streak = GREATEST(longest_streak, $3),
+      last_study_date = CURRENT_DATE,
+      updated_at = CURRENT_TIMESTAMP
+  `, [
+    parseInt(completedCount.rows[0].count),
+    parseInt(hoursResult.rows[0].total_hours || 0),
+    currentStreak
+  ]);
+}

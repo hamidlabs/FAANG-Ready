@@ -1,29 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
+import { NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const file = searchParams.get('file')
+    const { searchParams } = new URL(request.url);
+    const filePath = searchParams.get('path');
     
-    if (!file) {
-      return NextResponse.json({ error: 'File parameter required' }, { status: 400 })
+    if (!filePath) {
+      return NextResponse.json({ error: 'File path required' }, { status: 400 });
     }
     
-    const contentDir = join(process.cwd(), 'content')
-    const filePath = join(contentDir, file)
+    // Construct full path to content file
+    const fullPath = path.join(process.cwd(), 'content', filePath);
     
-    // Security check - ensure file is within content directory
-    if (!filePath.startsWith(contentDir)) {
-      return NextResponse.json({ error: 'Invalid file path' }, { status: 400 })
+    try {
+      const content = await readFile(fullPath, 'utf-8');
+      return new NextResponse(content, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+    } catch (fileError) {
+      console.error('File read error:', fileError);
+      return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
-    
-    const content = await readFile(filePath, 'utf-8')
-    
-    return NextResponse.json({ content })
   } catch (error) {
-    console.error('Error reading file:', error)
-    return NextResponse.json({ content: '# Error\n\nCould not load file content.' })
+    console.error('API error:', error);
+    return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
   }
 }
