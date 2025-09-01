@@ -26,33 +26,17 @@ export async function GET() {
           title: file.replace('.md', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
         }));
 
-      // Extract phase from topic ID (assuming format: "01-topic-name")
-      const phaseMatch = topicId.match(/^(\d{2})/);
-      let phase = 'phase1'; // default
-      
-      if (phaseMatch) {
-        const num = parseInt(phaseMatch[1]);
-        if (num >= 1 && num <= 4) phase = 'phase1';
-        else if (num >= 5 && num <= 6) phase = 'phase2'; 
-        else if (num >= 9 && num <= 13) phase = 'phase3';
-        else if (num >= 14 && num <= 17) phase = 'phase4';
-        else if (num >= 18 && num <= 27) phase = 'phase5';
-        else if (num >= 28 && num <= 35) phase = 'phase6';
-      }
-
-      // Generate title from topic ID
       const title = topicId
-        .replace(/^\d{2}-/, '') // remove number prefix
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+        .replace(/^(\d{2}-)/, '')
+        .replace(/-/g, ' ')
+        .replace(/(\b\w)/g, k => k.toUpperCase());
 
       return {
         id: topicId,
-        title,
+        title: title,
         filename: `${topicId}/main.md`, // default to main.md
-        phase,
-        order_index: parseInt(phaseMatch?.[1] || '99'),
+        phase: topicId,
+        order_index: parseInt(topicId.match(/^(\d{2})/)?.[1] || '99'),
         completed: false,
         starred: false,
         files

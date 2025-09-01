@@ -1,4 +1,4 @@
-import { Phase, Topic } from './types'
+import { Phase, Topic } from './types';
 
 export const phases: Phase[] = [
 	{
@@ -238,147 +238,111 @@ export const phases: Phase[] = [
 			},
 		],
 	},
-]
+];
 
 // Dynamic content loading functions
-export async function fetchTopicContent(
-	topicId: string,
-	fileName: string = 'main.md',
-): Promise<string> {
-	try {
-		const response = await fetch(`/api/content/${topicId}/${fileName}`)
+export async function fetchTopicContent(topicId: string, fileName: string = 'main.md'): Promise<string> {
+  try {
+    const response = await fetch(`/api/content/${topicId}/${fileName}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch content: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.content;
+  } catch (error) {
+    console.error(`Error fetching content for ${topicId}/${fileName}:`, error);
+    return `# Content Not Found
 
-		if (!response.ok) {
-			throw new Error(`Failed to fetch content: ${response.statusText}`)
-		}
-
-		const data = await response.json()
-		return data.content
-	} catch (error) {
-		console.error(`Error fetching content for ${topicId}/${fileName}:`, error)
-		return `# Content Not Found\n\nUnable to load content for this topic.`
-	}
+Unable to load content for this topic.`;
+  }
 }
 
-export async function fetchTopicFiles(
-	topicId: string,
-): Promise<Array<{ name: string; title: string }>> {
-	try {
-		const response = await fetch('/api/content/list-files', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ topicId }),
-		})
-
-		if (!response.ok) {
-			throw new Error(`Failed to fetch files: ${response.statusText}`)
-		}
-
-		const data = await response.json()
-		return data.files || []
-	} catch (error) {
-		console.error(`Error fetching files for ${topicId}:`, error)
-		return []
-	}
+export async function fetchTopicFiles(topicId: string): Promise<Array<{name: string, title: string}>> {
+  try {
+    const response = await fetch('/api/content/list-files', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ topicId }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch files: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.files || [];
+  } catch (error) {
+    console.error(`Error fetching files for ${topicId}:`, error);
+    return [];
+  }
 }
 
 export async function fetchAllTopics(): Promise<Topic[]> {
-	try {
-		const response = await fetch('/api/topics')
-
-		if (!response.ok) {
-			throw new Error(`Failed to fetch topics: ${response.statusText}`)
-		}
-
-		const data = await response.json()
-		return data.topics || []
-	} catch (error) {
-		console.error('Error fetching topics:', error)
-		return []
-	}
+  try {
+    const response = await fetch('/api/topics');
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch topics: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    return data.topics || [];
+  } catch (error) {
+    console.error('Error fetching topics:', error);
+    return [];
+  }
 }
 
 // Group topics into phases
 export function groupTopicsIntoPhases(topics: Topic[]): Phase[] {
-	const phaseMap = new Map<string, Phase>()
+  const phaseMap = new Map<string, Phase>();
+  
+  // Group topics by phase
+  topics.forEach(topic => {
+    const phaseId = topic.phase;
+    if (!phaseMap.has(phaseId)) {
+      const title = phaseId
+        .replace(/^(\d{2}-)/, '')
+        .replace(/-/g, ' ')
+        .replace(/(\b\w)/g, k => k.toUpperCase());
 
-	// Initialize phases
-	const phaseInfo = {
-		phase1: {
-			title: 'English Communication Foundation',
-			description: 'Master technical communication and interview skills',
-			order_index: 1,
-		},
-		phase2: {
-			title: 'Problem-Solving Mental Framework',
-			description: 'Build systematic approach to algorithmic thinking',
-			order_index: 2,
-		},
-		phase3: {
-			title: 'Core Data Structures',
-			description: 'Master fundamental data structures',
-			order_index: 3,
-		},
-		phase4: {
-			title: 'Essential Algorithms',
-			description: 'Core sorting and searching algorithms',
-			order_index: 4,
-		},
-		phase5: {
-			title: 'Pattern-Based Problem Solving',
-			description: 'Master the most important coding patterns',
-			order_index: 5,
-		},
-		phase6: {
-			title: 'Advanced Patterns',
-			description: 'Dynamic programming and advanced techniques',
-			order_index: 6,
-		},
-	}
-
-	// Group topics by phase
-	topics.forEach(topic => {
-		const phaseId = topic.phase
-		if (!phaseMap.has(phaseId)) {
-			const info = phaseInfo[phaseId as keyof typeof phaseInfo] || {
-				title: `Phase ${phaseId}`,
-				description: '',
-				order_index: 999,
-			}
-
-			phaseMap.set(phaseId, {
-				id: phaseId,
-				...info,
-				topics: [],
-			})
-		}
-
-		phaseMap.get(phaseId)!.topics.push(topic)
-	})
-
-	// Convert to array and sort
-	const phases = Array.from(phaseMap.values())
-	phases.sort((a, b) => a.order_index - b.order_index)
-
-	// Sort topics within each phase
-	phases.forEach(phase => {
-		phase.topics.sort((a, b) => a.order_index - b.order_index)
-	})
-
-	return phases
+      phaseMap.set(phaseId, {
+        id: phaseId,
+        title: title,
+        description: '',
+        order_index: parseInt(phaseId.match(/^(\d{2})/)?.[1] || '99'),
+        topics: []
+      });
+    }
+    
+    phaseMap.get(phaseId)!.topics.push(topic);
+  });
+  
+  // Convert to array and sort
+  const phases = Array.from(phaseMap.values());
+  phases.sort((a, b) => a.order_index - b.order_index);
+  
+  // Sort topics within each phase
+  phases.forEach(phase => {
+    phase.topics.sort((a, b) => a.order_index - b.order_index);
+  });
+  
+  return phases;
 }
 
 // Legacy function for backward compatibility
 export function getTopicContentSync(filename: string): string {
-	const title = filename
-		.replace('.md', '')
-		.split('-')
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ')
-
-	return `# ${title}
+  const title = filename
+    .replace('.md', '')
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+    
+  return `# ${title}
 
 Content is being loaded dynamically from the content directory.
 
@@ -390,8 +354,8 @@ Files in this topic directory will be auto-discovered and listed here.
 
 ---
 
-*Note: Content is now loaded dynamically from the \`content/${filename.replace(
-		'/main.md',
-		'',
-	)}\` directory.*`
+*Note: Content is now loaded dynamically from the 
+content/${filename.replace('/main.md', '')} directory.*`;
 }
+
+
