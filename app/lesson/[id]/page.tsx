@@ -145,9 +145,9 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         </Card>
 
         {/* Content */}
-        <Card>
+        <Card className="bg-white">
           <CardContent className="p-8">
-            <div className="prose prose-lg max-w-none">
+            <div className="prose prose-lg prose-gray max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>

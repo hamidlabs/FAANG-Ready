@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "init-db": "node scripts/init-db.js"
+    "init-db": "node scripts/init-db.js",
+    "update-paths": "node scripts/update-paths.js"
   },
   "dependencies": {
     "@radix-ui/react-progress": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/pg": "^8.10.9",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",

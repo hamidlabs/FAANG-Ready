@@ -11,8 +11,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'File path required' }, { status: 400 });
     }
     
-    // Construct full path to content file
-    const fullPath = path.join(process.cwd(), 'content', filePath);
+    // Try main.md first (most common structure)
+    let fullPath = path.join(process.cwd(), 'content', filePath.replace('/main.md', ''), 'main.md');
     
     try {
       const content = await readFile(fullPath, 'utf-8');
@@ -20,8 +20,18 @@ export async function GET(request: Request) {
         headers: { 'Content-Type': 'text/plain' }
       });
     } catch (fileError) {
-      console.error('File read error:', fileError);
-      return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      // If main.md doesn't exist, try the direct path
+      fullPath = path.join(process.cwd(), 'content', filePath);
+      
+      try {
+        const content = await readFile(fullPath, 'utf-8');
+        return new NextResponse(content, {
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      } catch (directError) {
+        console.error('File read error:', directError);
+        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+      }
     }
   } catch (error) {
     console.error('API error:', error);

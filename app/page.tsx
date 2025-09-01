@@ -238,11 +238,20 @@ export default function Dashboard() {
                           </div>
                         </div>
                       </div>
-                      {lesson.completed && (
-                        <div className="text-green-600 font-semibold">
-                          ✅ Completed
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {lesson.completed && (
+                          <div className="text-green-600 font-semibold mr-2">
+                            ✅ Completed
+                          </div>
+                        )}
+                        <Link href={`/lesson/${lesson.id}`}>
+                          <Button variant="outline" size="sm">
+                            <BookOpen className="h-4 w-4 mr-2" />
+                            Study
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   ))}
                 </div>
