@@ -1,161 +1,98 @@
 'use client'
 
-import ContentView from '@/components/ContentView'
+import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
-import { fetchAllTopics, groupTopicsIntoPhases } from '@/lib/content'
-import { Phase, Topic } from '@/lib/types'
-import { useEffect, useState } from 'react'
+import ContentView from '@/components/ContentView'
+
+interface FileItem {
+  path: string
+  name: string
+  isDirectory: boolean
+}
+
+interface Progress {
+  [key: string]: {
+    completed: boolean
+    starred: boolean
+  }
+}
 
 export default function Home() {
-	const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-	const [searchTerm, setSearchTerm] = useState('')
-	const [completedTopics, setCompletedTopics] = useState<Set<string>>(new Set())
-	const [starredTopics, setStarredTopics] = useState<Set<string>>(new Set())
-	const [phases, setPhases] = useState<Phase[]>([])
-	const [loading, setLoading] = useState(true)
+  const [files, setFiles] = useState<FileItem[]>([])
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [progress, setProgress] = useState<Progress>({})
 
-	// Load topics dynamically
-	useEffect(() => {
-		const loadTopics = async () => {
-			try {
-				setLoading(true)
-				const topics = await fetchAllTopics()
-				const groupedPhases = groupTopicsIntoPhases(topics)
-				setPhases(groupedPhases)
+  useEffect(() => {
+    fetch('/api/files')
+      .then(res => res.json())
+      .then(data => {
+        setFiles(data.files || [])
+        if (data.files?.length > 0) {
+          const firstMdFile = data.files.find((f: FileItem) => f.name.endsWith('.md'))
+          if (firstMdFile) setSelectedFile(firstMdFile.path)
+        }
+      })
+  }, [])
 
-				// Set default first topic
-				if (groupedPhases[0]?.topics[0]) {
-					setSelectedTopic(groupedPhases[0].topics[0])
-				}
-			} catch (error) {
-				console.error('Error loading topics:', error)
-			} finally {
-				setLoading(false)
-			}
-		}
+  // Load progress from localStorage
+  useEffect(() => {
+    const savedProgress = localStorage.getItem('faang-prep-progress')
+    if (savedProgress) {
+      setProgress(JSON.parse(savedProgress))
+    }
+  }, [])
 
-		loadTopics()
-	}, [])
+  // Save progress to localStorage
+  useEffect(() => {
+    localStorage.setItem('faang-prep-progress', JSON.stringify(progress))
+  }, [progress])
 
-	// Load progress from localStorage
-	useEffect(() => {
-		const savedCompleted = localStorage.getItem('completedTopics')
-		const savedStarred = localStorage.getItem('starredTopics')
+  const toggleComplete = (filePath: string) => {
+    setProgress(prev => ({
+      ...prev,
+      [filePath]: {
+        ...prev[filePath],
+        completed: !prev[filePath]?.completed
+      }
+    }))
+  }
 
-		if (savedCompleted) {
-			setCompletedTopics(new Set(JSON.parse(savedCompleted)))
-		}
+  const toggleStar = (filePath: string) => {
+    setProgress(prev => ({
+      ...prev,
+      [filePath]: {
+        ...prev[filePath],
+        starred: !prev[filePath]?.starred
+      }
+    }))
+  }
 
-		if (savedStarred) {
-			setStarredTopics(new Set(JSON.parse(savedStarred)))
-		}
-	}, [])
+  const getProgress = () => {
+    const mdFiles = files.filter(f => f.name.endsWith('.md'))
+    const completed = mdFiles.filter(f => progress[f.path]?.completed).length
+    return {
+      completed,
+      total: mdFiles.length,
+      percentage: mdFiles.length > 0 ? Math.round((completed / mdFiles.length) * 100) : 0
+    }
+  }
 
-	// Save progress to localStorage
-	useEffect(() => {
-		localStorage.setItem(
-			'completedTopics',
-			JSON.stringify([...completedTopics]),
-		)
-	}, [completedTopics])
-
-	useEffect(() => {
-		localStorage.setItem('starredTopics', JSON.stringify([...starredTopics]))
-	}, [starredTopics])
-
-	const toggleComplete = (topicId: string) => {
-		const newCompleted = new Set(completedTopics)
-		if (newCompleted.has(topicId)) {
-			newCompleted.delete(topicId)
-		} else {
-			newCompleted.add(topicId)
-		}
-		setCompletedTopics(newCompleted)
-	}
-
-	const toggleStar = (topicId: string) => {
-		const newStarred = new Set(starredTopics)
-		if (newStarred.has(topicId)) {
-			newStarred.delete(topicId)
-		} else {
-			newStarred.add(topicId)
-		}
-		setStarredTopics(newStarred)
-	}
-
-	const getTotalProgress = () => {
-		const total = phases.reduce((acc, phase) => acc + phase.topics.length, 0)
-		const completed = completedTopics.size
-		return {
-			completed,
-			total,
-			percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
-		}
-	}
-
-	const getPhaseProgress = (phase: Phase) => {
-		const total = phase.topics.length
-		const completed = phase.topics.filter(topic =>
-			completedTopics.has(topic.id),
-		).length
-		return {
-			completed,
-			total,
-			percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
-		}
-	}
-
-	// Update topic completion status for rendering
-	const phasesWithProgress = phases.map(phase => ({
-		...phase,
-		topics: phase.topics.map(topic => ({
-			...topic,
-			completed: completedTopics.has(topic.id),
-			starred: starredTopics.has(topic.id),
-		})),
-	}))
-
-	if (loading) {
-		return (
-			<div className="flex h-screen bg-dark-100 items-center justify-center">
-				<div className="text-center">
-					<div className="text-xl text-white mb-2">
-						Loading FAANG Interview Prep
-					</div>
-					<div className="text-gray-400">Discovering content...</div>
-				</div>
-			</div>
-		)
-	}
-
-	return (
-		<div className="flex h-screen bg-dark-100">
-			<Sidebar
-				phases={phasesWithProgress}
-				selectedTopic={selectedTopic}
-				onTopicSelect={setSelectedTopic}
-				collapsed={sidebarCollapsed}
-				onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-				searchTerm={searchTerm}
-				onSearchChange={setSearchTerm}
-				getTotalProgress={getTotalProgress}
-				getPhaseProgress={getPhaseProgress}
-			/>
-
-			<main className={`flex-1 transition-all duration-300`}>
-				{selectedTopic && (
-					<ContentView
-						topic={selectedTopic}
-						isCompleted={completedTopics.has(selectedTopic.id)}
-						isStarred={starredTopics.has(selectedTopic.id)}
-						onToggleComplete={() => toggleComplete(selectedTopic.id)}
-						onToggleStar={() => toggleStar(selectedTopic.id)}
-						phases={phasesWithProgress}
-						onTopicSelect={setSelectedTopic}
-					/>
-				)}
-			</main>
-		</div>
-	)
+  return (
+    <div className="flex h-screen bg-gray-900">
+      <Sidebar 
+        files={files}
+        selectedFile={selectedFile}
+        onFileSelect={setSelectedFile}
+        progress={progress}
+        getProgress={getProgress}
+      />
+      <ContentView 
+        selectedFile={selectedFile}
+        isCompleted={progress[selectedFile || '']?.completed || false}
+        isStarred={progress[selectedFile || '']?.starred || false}
+        onToggleComplete={() => selectedFile && toggleComplete(selectedFile)}
+        onToggleStar={() => selectedFile && toggleStar(selectedFile)}
+      />
+    </div>
+  )
 }
