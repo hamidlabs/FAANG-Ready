@@ -91,24 +91,24 @@ export default function LessonPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => router.back()}>
+          <Button variant="outline" onClick={() => router.back()} className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900">{lesson.title}</h1>
-            <p className="text-gray-600">{lesson.phase_name}</p>
+            <h1 className="text-3xl font-bold text-white">{lesson.title}</h1>
+            <p className="text-blue-200">{lesson.phase_name}</p>
           </div>
           
           <Button
             onClick={toggleCompletion}
             variant={lesson.completed ? "default" : "outline"}
-            className={lesson.completed ? "bg-green-500 hover:bg-green-600" : ""}
+            className={lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"}
           >
             {lesson.completed ? (
               <>
@@ -125,18 +125,18 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         </div>
 
         {/* Lesson Info */}
-        <Card className="mb-6">
+        <Card className="mb-6 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
           <CardContent className="p-6">
             <div className="flex items-center gap-4">
-              <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white`}>
+              <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0`}>
                 {lesson.difficulty}
               </Badge>
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-slate-300">
                 <Clock className="h-4 w-4" />
                 <span>{lesson.estimated_hours}h estimated</span>
               </div>
               {lesson.completed && (
-                <Badge className="bg-green-500">
+                <Badge className="bg-emerald-600 border-0">
                   ✅ Completed
                 </Badge>
               )}
@@ -145,9 +145,18 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         </Card>
 
         {/* Content */}
-        <Card className="bg-white">
+        <Card className="bg-slate-800/70 border-slate-700 backdrop-blur-sm">
           <CardContent className="p-8">
-            <div className="prose prose-lg prose-gray max-w-none">
+            <div className="prose prose-lg prose-invert max-w-none 
+                          prose-headings:text-blue-200 prose-headings:font-bold
+                          prose-p:text-slate-300 prose-p:leading-relaxed
+                          prose-strong:text-white prose-strong:font-semibold
+                          prose-code:bg-slate-700 prose-code:text-blue-300 prose-code:px-2 prose-code:py-1 prose-code:rounded
+                          prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700
+                          prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-slate-800/50 prose-blockquote:pl-4
+                          prose-ul:text-slate-300 prose-ol:text-slate-300
+                          prose-li:text-slate-300 prose-li:my-1
+                          prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>
@@ -158,7 +167,7 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         {/* Completion CTA */}
         {!lesson.completed && (
           <div className="mt-8 text-center">
-            <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+            <Card className="bg-gradient-to-r from-emerald-600 to-blue-700 text-white border-0">
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-2">🎯 Ready to mark this lesson complete?</h3>
                 <p className="mb-4">You're one step closer to your FAANG dream!</p>
@@ -166,6 +175,7 @@ export default function LessonPage({ params }: { params: { id: string } }) {
                   onClick={toggleCompletion}
                   variant="secondary"
                   size="lg"
+                  className="bg-white text-slate-900 hover:bg-slate-100"
                 >
                   <CheckCircle2 className="h-5 w-5 mr-2" />
                   Mark as Complete

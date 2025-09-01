@@ -86,33 +86,46 @@ export default function Dashboard() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-green-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'hard': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'easy': return 'bg-emerald-500';
+      case 'medium': return 'bg-amber-500';
+      case 'hard': return 'bg-rose-500';
+      default: return 'bg-slate-500';
     }
+  };
+
+  const getMotivationalMessage = () => {
+    if (overallProgress === 0) return "🚀 Ready to start your FAANG journey?";
+    if (overallProgress < 25) return "💪 Great start! Keep the momentum going!";
+    if (overallProgress < 50) return "🔥 You're on fire! Halfway there!";
+    if (overallProgress < 75) return "⭐ Amazing progress! You're almost there!";
+    if (overallProgress < 100) return "🏆 So close to mastery! Final push!";
+    return "🎉 FAANG READY! You've mastered everything!";
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-2xl font-bold text-indigo-600">Loading your FAANG journey...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <div className="text-2xl font-bold text-blue-200">Loading your FAANG journey...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">🚀 FAANG Interview Mastery</h1>
-          <p className="text-xl text-gray-600">Your journey to Big Tech success</p>
+          <h1 className="text-4xl font-bold text-white mb-2">🚀 FAANG Interview Mastery</h1>
+          <p className="text-xl text-blue-200 mb-4">Your journey to Big Tech success</p>
+          <div className="text-lg font-semibold text-blue-300">{getMotivationalMessage()}</div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-orange-400 to-red-500 text-white">
+          <Card className="bg-gradient-to-r from-orange-500 to-red-600 text-white transform hover:scale-105 transition-transform border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -124,19 +137,19 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-green-400 to-blue-500 text-white">
+          <Card className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white transform hover:scale-105 transition-transform border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-green-100">Completed</p>
+                  <p className="text-emerald-100">Completed</p>
                   <p className="text-3xl font-bold">{completedLessons}/{totalLessons}</p>
                 </div>
-                <CheckCircle2 className="h-12 w-12 text-green-200" />
+                <CheckCircle2 className="h-12 w-12 text-emerald-200" />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-purple-400 to-pink-500 text-white">
+          <Card className="bg-gradient-to-r from-purple-500 to-pink-600 text-white transform hover:scale-105 transition-transform border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -148,40 +161,41 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+          <Card className="bg-gradient-to-r from-amber-500 to-orange-600 text-white transform hover:scale-105 transition-transform border-0">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-yellow-100">Progress</p>
+                  <p className="text-amber-100">Progress</p>
                   <p className="text-3xl font-bold">{Math.round(overallProgress)}%</p>
                 </div>
-                <Trophy className="h-12 w-12 text-yellow-200" />
+                <Trophy className="h-12 w-12 text-amber-200" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Overall Progress */}
-        <Card className="mb-8">
+        <Card className="mb-8 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-white">
               <Target className="h-6 w-6" />
-              Overall Progress
+              Overall Progress to FAANG Success
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={overallProgress} className="h-4 mb-2" />
-            <p className="text-sm text-gray-600">
-              {completedLessons} of {totalLessons} lessons completed ({Math.round(overallProgress)}%)
-            </p>
+            <Progress value={overallProgress} className="h-6 mb-4" />
+            <div className="flex justify-between text-sm text-slate-300">
+              <span>{completedLessons} of {totalLessons} lessons completed</span>
+              <span className="font-bold text-blue-400">{Math.round(overallProgress)}% Complete</span>
+            </div>
           </CardContent>
         </Card>
 
         {/* Phases */}
         <div className="space-y-6">
           {phases.map((phase) => (
-            <Card key={phase.id} className="overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <Card key={phase.id} className="overflow-hidden bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800/70 transition-all">
+              <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle className="text-xl mb-2">{phase.name}</CardTitle>
@@ -205,18 +219,18 @@ export default function Dashboard() {
                   {phase.lessons.map((lesson) => (
                     <div
                       key={lesson.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all ${
+                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
                         lesson.completed
-                          ? 'bg-green-50 border-green-200'
-                          : 'bg-white border-gray-200 hover:border-indigo-300'
+                          ? 'bg-emerald-900/30 border-emerald-600/50'
+                          : 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50'
                       }`}
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-4 flex-1">
                         <Button
                           variant={lesson.completed ? "default" : "outline"}
                           size="sm"
                           onClick={() => toggleLesson(lesson.id)}
-                          className={lesson.completed ? "bg-green-500 hover:bg-green-600" : ""}
+                          className={lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-600 hover:bg-slate-500 border-slate-500 text-white"}
                         >
                           {lesson.completed ? (
                             <CheckCircle2 className="h-4 w-4" />
@@ -224,15 +238,15 @@ export default function Dashboard() {
                             <BookOpen className="h-4 w-4" />
                           )}
                         </Button>
-                        <div>
-                          <h4 className={`font-semibold ${lesson.completed ? 'text-green-800' : 'text-gray-900'}`}>
+                        <div className="flex-1">
+                          <h4 className={`font-semibold ${lesson.completed ? 'text-emerald-300' : 'text-white'}`}>
                             {lesson.title}
                           </h4>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white`}>
+                            <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0`}>
                               {lesson.difficulty}
                             </Badge>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-slate-400">
                               {lesson.estimated_hours}h estimated
                             </span>
                           </div>
@@ -240,12 +254,12 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         {lesson.completed && (
-                          <div className="text-green-600 font-semibold mr-2">
+                          <div className="text-emerald-400 font-semibold mr-2">
                             ✅ Completed
                           </div>
                         )}
                         <Link href={`/lesson/${lesson.id}`}>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white">
                             <BookOpen className="h-4 w-4 mr-2" />
                             Study
                             <ArrowRight className="h-4 w-4 ml-2" />
@@ -262,12 +276,19 @@ export default function Dashboard() {
 
         {/* Motivational Footer */}
         <div className="mt-12 text-center">
-          <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <Card className="bg-gradient-to-r from-indigo-700 to-purple-800 text-white border-0">
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-4">🎯 You're on track to FAANG success!</h3>
-              <p className="text-lg text-indigo-100">
+              <p className="text-lg text-indigo-100 mb-4">
                 Every lesson completed brings you closer to your dream job. Keep going! 💪
               </p>
+              <div className="text-sm text-indigo-200">
+                {overallProgress < 100 ? (
+                  `Only ${Math.ceil((100 - overallProgress) / 100 * totalLessons)} lessons left to complete your journey!`
+                ) : (
+                  "🎉 Congratulations! You're now FAANG-ready!"
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>
