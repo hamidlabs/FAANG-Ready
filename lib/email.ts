@@ -1,15 +1,3 @@
-import nodemailer from 'nodemailer';
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP || 'smtp-relay.brevo.com',
-  port: parseInt(process.env.PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.LOGIN,
-    pass: process.env.PASSWORD,
-  },
-});
-
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -17,18 +5,38 @@ export interface EmailOptions {
   text?: string;
 }
 
-export async function sendEmail({ to, subject, html, text }: EmailOptions) {
+export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
-    const info = await transporter.sendMail({
-      from: '"FAANG Prep Platform" <noreply@faangprep.com>',
-      to,
-      subject,
-      html,
-      text: text || html.replace(/<[^>]*>/g, ''),
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY || '',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          name: "FAANG Prep Platform",
+          email: "noreply@faangprep.com"
+        },
+        to: [{
+          email: to,
+          name: "FAANG Student"
+        }],
+        subject: subject,
+        htmlContent: html
+      })
     });
 
-    console.log('Email sent:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Email sent via Brevo API:', result.messageId);
+      return { success: true, messageId: result.messageId };
+    } else {
+      const errorData = await response.text();
+      console.error('Brevo API error:', response.status, errorData);
+      return { success: false, error: `HTTP ${response.status}: ${errorData}` };
+    }
   } catch (error) {
     console.error('Email error:', error);
     return { success: false, error };

@@ -13,6 +13,8 @@ export async function POST(request: Request) {
       [lessonId]
     );
     
+    let wasJustCompleted = false;
+    
     if (existingProgress.rows.length > 0) {
       // Toggle completion
       if (existingProgress.rows[0].completed_at) {
@@ -21,12 +23,14 @@ export async function POST(request: Request) {
           'UPDATE user_progress SET completed_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE lesson_id = $1',
           [lessonId]
         );
+        wasJustCompleted = false;
       } else {
         // Mark as complete
         await client.query(
           'UPDATE user_progress SET completed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE lesson_id = $1',
           [lessonId]
         );
+        wasJustCompleted = true;
       }
     } else {
       // Create new progress entry as completed
@@ -34,10 +38,11 @@ export async function POST(request: Request) {
         'INSERT INTO user_progress (lesson_id, completed_at, confidence_level) VALUES ($1, CURRENT_TIMESTAMP, 3)',
         [lessonId]
       );
+      wasJustCompleted = true;
     }
     
-    // Update user stats and get lesson info for email
-    const updatedStats = await updateUserStats(client, lessonId);
+    // Update user stats
+    const updatedStats = await updateUserStats(client, lessonId, wasJustCompleted);
     
     // Get lesson details for email
     const lessonQuery = await client.query(
@@ -47,51 +52,73 @@ export async function POST(request: Request) {
     
     client.release();
     
-    // Send congratulatory email when lesson is completed
+    // Send congratulatory email when lesson is completed (non-blocking)
     if (lessonQuery.rows.length > 0 && updatedStats.wasJustCompleted) {
       const lessonTitle = lessonQuery.rows[0].title;
       const streak = updatedStats.currentStreak;
       
-      // Send email to track user engagement
-      const emailTemplate = emailTemplates.lessonCompleted(lessonTitle, streak);
-      await sendEmail({
-        to: 'hamid.coder.js@gmail.com',
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-      });
+      console.log(`🎉 Lesson completed: "${lessonTitle}" - Streak: ${streak} days`);
       
-      // Send achievement emails for milestones
-      if (updatedStats.totalCompleted === 10) {
-        const achievementTemplate = emailTemplates.congratulationsEmail(
-          'First 10 Lessons Complete!',
-          'You\'ve completed your first 10 lessons! This shows real dedication to mastering system design and coding skills.'
-        );
-        await sendEmail({
-          to: 'hamid.coder.js@gmail.com',
-          subject: achievementTemplate.subject,
-          html: achievementTemplate.html,
-        });
-      } else if (streak === 7) {
-        const achievementTemplate = emailTemplates.congratulationsEmail(
-          'Week-Long Streak Master!',
-          'Seven days in a row! You\'re building the kind of consistent study habits that lead to FAANG success.'
-        );
-        await sendEmail({
-          to: 'hamid.coder.js@gmail.com',
-          subject: achievementTemplate.subject,
-          html: achievementTemplate.html,
-        });
-      } else if (streak === 30) {
-        const achievementTemplate = emailTemplates.congratulationsEmail(
-          'Monthly Consistency Champion!',
-          'Thirty days of consistent learning! You\'re in the top 1% of dedicated learners. FAANG companies will love this commitment!'
-        );
-        await sendEmail({
-          to: 'hamid.coder.js@gmail.com',
-          subject: achievementTemplate.subject,
-          html: achievementTemplate.html,
-        });
-      }
+      // Send emails in background (don't await to avoid blocking the response)
+      const sendEmailsInBackground = async () => {
+        try {
+          console.log('Sending lesson completion email...');
+          // Send lesson completion email
+          const emailTemplate = emailTemplates.lessonCompleted(lessonTitle, streak);
+          const emailResult = await sendEmail({
+            to: 'hamid.coder.js@gmail.com',
+            subject: emailTemplate.subject,
+            html: emailTemplate.html,
+          });
+          
+          if (emailResult.success) {
+            console.log('✅ Lesson completion email sent successfully!');
+          } else {
+            console.log('❌ Failed to send lesson completion email:', emailResult.error);
+          }
+          
+          // Send achievement emails for milestones
+          if (updatedStats.totalCompleted === 10) {
+            console.log('🏆 Achievement: First 10 Lessons Complete!');
+            const achievementTemplate = emailTemplates.congratulationsEmail(
+              'First 10 Lessons Complete!',
+              'You\'ve completed your first 10 lessons! This shows real dedication to mastering system design and coding skills.'
+            );
+            await sendEmail({
+              to: 'hamid.coder.js@gmail.com',
+              subject: achievementTemplate.subject,
+              html: achievementTemplate.html,
+            });
+          } else if (streak === 7) {
+            console.log('🏆 Achievement: Week-Long Streak Master!');
+            const achievementTemplate = emailTemplates.congratulationsEmail(
+              'Week-Long Streak Master!',
+              'Seven days in a row! You\'re building the kind of consistent study habits that lead to FAANG success.'
+            );
+            await sendEmail({
+              to: 'hamid.coder.js@gmail.com',
+              subject: achievementTemplate.subject,
+              html: achievementTemplate.html,
+            });
+          } else if (streak === 30) {
+            console.log('🏆 Achievement: Monthly Consistency Champion!');
+            const achievementTemplate = emailTemplates.congratulationsEmail(
+              'Monthly Consistency Champion!',
+              'Thirty days of consistent learning! You\'re in the top 1% of dedicated learners. FAANG companies will love this commitment!'
+            );
+            await sendEmail({
+              to: 'hamid.coder.js@gmail.com',
+              subject: achievementTemplate.subject,
+              html: achievementTemplate.html,
+            });
+          }
+        } catch (error) {
+          console.error('Background email error:', error);
+        }
+      };
+      
+      // Don't await - let it run in background
+      sendEmailsInBackground();
     }
     
     return NextResponse.json({ success: true });
@@ -101,13 +128,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function updateUserStats(client: any, lessonId: string) {
-  // Check if this was just completed (for email trigger)
-  const recentCompletion = await client.query(`
-    SELECT completed_at FROM user_progress 
-    WHERE lesson_id = $1 AND completed_at > NOW() - INTERVAL '1 minute'
-  `, [lessonId]);
-  const wasJustCompleted = recentCompletion.rows.length > 0;
+async function updateUserStats(client: any, lessonId: string, wasJustCompleted: boolean) {
   
   // Count completed lessons
   const completedCount = await client.query(
