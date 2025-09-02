@@ -102,7 +102,7 @@ Start by selecting any topic from the sidebar to begin your journey!`)
               ul: ({children}) => <ul className="mb-6 ml-6 space-y-3">{children}</ul>,
               ol: ({children}) => <ol className="mb-6 ml-6 space-y-3">{children}</ol>,
               li: ({children}) => <li className="text-gray-300 text-lg">{children}</li>,
-              code: ({inline, children}) => 
+              code: ({inline, children, ...props}: any) => 
                 inline ? 
                   <code className="bg-gray-800 px-2 py-1 rounded text-green-400 text-base font-mono">{children}</code> :
                   <code className="text-gray-300">{children}</code>,
