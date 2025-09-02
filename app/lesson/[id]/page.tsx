@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle2, Clock, BookOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, BookOpen, CheckCircle2, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -33,9 +33,9 @@ export default function LessonPage({ params }: { params: { id: string } }) {
     try {
       const response = await fetch(`/api/lesson/${params.id}`);
       const lessonData = await response.json();
-      
+
       setLesson(lessonData);
-      
+
       // Fetch markdown content
       const contentResponse = await fetch(`/api/content?path=${encodeURIComponent(lessonData.file_path)}`);
       const contentData = await contentResponse.text();
@@ -49,14 +49,14 @@ export default function LessonPage({ params }: { params: { id: string } }) {
 
   const toggleCompletion = async () => {
     if (!lesson) return;
-    
+
     try {
       const response = await fetch('/api/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lessonId: lesson.id })
       });
-      
+
       if (response.ok) {
         setLesson({ ...lesson, completed: !lesson.completed });
       }
@@ -92,19 +92,19 @@ export default function LessonPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="outline" onClick={() => router.back()} className="bg-slate-700 hover:bg-slate-600 border-slate-600 text-white">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-white">{lesson.title}</h1>
             <p className="text-blue-200">{lesson.phase_name}</p>
           </div>
-          
+
           <Button
             onClick={toggleCompletion}
             variant={lesson.completed ? "default" : "outline"}
@@ -147,7 +147,7 @@ export default function LessonPage({ params }: { params: { id: string } }) {
         {/* Content */}
         <Card className="bg-slate-800/70 border-slate-700 backdrop-blur-sm">
           <CardContent className="p-8">
-            <div className="prose prose-lg prose-invert max-w-none 
+            <div className="prose prose-lg prose-invert max-w-none
                           prose-headings:text-blue-200 prose-headings:font-bold
                           prose-p:text-slate-300 prose-p:leading-relaxed
                           prose-strong:text-white prose-strong:font-semibold
@@ -171,7 +171,7 @@ export default function LessonPage({ params }: { params: { id: string } }) {
               <CardContent className="p-6">
                 <h3 className="text-xl font-bold mb-2">🎯 Ready to mark this lesson complete?</h3>
                 <p className="mb-4">You're one step closer to your FAANG dream!</p>
-                <Button 
+                <Button
                   onClick={toggleCompletion}
                   variant="secondary"
                   size="lg"
