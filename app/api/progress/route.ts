@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { sendEmail, emailTemplates } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -35,10 +36,63 @@ export async function POST(request: Request) {
       );
     }
     
-    // Update user stats
-    await updateUserStats(client);
+    // Update user stats and get lesson info for email
+    const updatedStats = await updateUserStats(client, lessonId);
+    
+    // Get lesson details for email
+    const lessonQuery = await client.query(
+      'SELECT title FROM lessons WHERE id = $1',
+      [lessonId]
+    );
     
     client.release();
+    
+    // Send congratulatory email when lesson is completed
+    if (lessonQuery.rows.length > 0 && updatedStats.wasJustCompleted) {
+      const lessonTitle = lessonQuery.rows[0].title;
+      const streak = updatedStats.currentStreak;
+      
+      // Send email to track user engagement
+      const emailTemplate = emailTemplates.lessonCompleted(lessonTitle, streak);
+      await sendEmail({
+        to: 'hamid.coder.js@gmail.com',
+        subject: emailTemplate.subject,
+        html: emailTemplate.html,
+      });
+      
+      // Send achievement emails for milestones
+      if (updatedStats.totalCompleted === 10) {
+        const achievementTemplate = emailTemplates.congratulationsEmail(
+          'First 10 Lessons Complete!',
+          'You\'ve completed your first 10 lessons! This shows real dedication to mastering system design and coding skills.'
+        );
+        await sendEmail({
+          to: 'hamid.coder.js@gmail.com',
+          subject: achievementTemplate.subject,
+          html: achievementTemplate.html,
+        });
+      } else if (streak === 7) {
+        const achievementTemplate = emailTemplates.congratulationsEmail(
+          'Week-Long Streak Master!',
+          'Seven days in a row! You\'re building the kind of consistent study habits that lead to FAANG success.'
+        );
+        await sendEmail({
+          to: 'hamid.coder.js@gmail.com',
+          subject: achievementTemplate.subject,
+          html: achievementTemplate.html,
+        });
+      } else if (streak === 30) {
+        const achievementTemplate = emailTemplates.congratulationsEmail(
+          'Monthly Consistency Champion!',
+          'Thirty days of consistent learning! You\'re in the top 1% of dedicated learners. FAANG companies will love this commitment!'
+        );
+        await sendEmail({
+          to: 'hamid.coder.js@gmail.com',
+          subject: achievementTemplate.subject,
+          html: achievementTemplate.html,
+        });
+      }
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -47,7 +101,14 @@ export async function POST(request: Request) {
   }
 }
 
-async function updateUserStats(client: any) {
+async function updateUserStats(client: any, lessonId: string) {
+  // Check if this was just completed (for email trigger)
+  const recentCompletion = await client.query(`
+    SELECT completed_at FROM user_progress 
+    WHERE lesson_id = $1 AND completed_at > NOW() - INTERVAL '1 minute'
+  `, [lessonId]);
+  const wasJustCompleted = recentCompletion.rows.length > 0;
+  
   // Count completed lessons
   const completedCount = await client.query(
     'SELECT COUNT(*) FROM user_progress WHERE completed_at IS NOT NULL'
@@ -104,4 +165,11 @@ async function updateUserStats(client: any) {
     parseInt(hoursResult.rows[0].total_hours || 0),
     currentStreak
   ]);
+  
+  return {
+    wasJustCompleted,
+    currentStreak,
+    totalCompleted: parseInt(completedCount.rows[0].count),
+    totalHours: parseInt(hoursResult.rows[0].total_hours || 0),
+  };
 }
