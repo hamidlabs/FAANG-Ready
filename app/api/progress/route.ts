@@ -73,7 +73,7 @@ async function updateUserStats(client: any) {
   `);
   
   let currentStreak = 0;
-  const dates = recentActivity.rows.map(row => row.completion_date);
+  const dates = recentActivity.rows.map((row: any) => row.completion_date);
   
   if (dates.length > 0) {
     const todayDate = new Date(today);
