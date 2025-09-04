@@ -1,42 +1,43 @@
+import { Resend } from 'resend';
+
 export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  from?: string;
+  fromName?: string;
 }
 
-export async function sendEmail({ to, subject, html }: EmailOptions) {
+export async function sendEmail({ to, subject, html, text, from = "onboarding@resend.dev", fromName = "FAANG Prep Platform" }: EmailOptions) {
   try {
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': process.env.BREVO_API_KEY || '',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        sender: {
-          name: "FAANG Prep Platform",
-          email: "noreply@faangprep.com"
-        },
-        to: [{
-          email: to,
-          name: "FAANG Student"
-        }],
-        subject: subject,
-        htmlContent: html
-      })
+    const resendApiKey = process.env.RESEND_API_KEY;
+    
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY missing");
+      return { success: false, error: "Email configuration error. Please contact support." };
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    const result = await resend.emails.send({
+      from: `${fromName} <${from}>`,
+      to: [to],
+      subject,
+      html,
+      text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
     });
 
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Email sent via Brevo API:', result.messageId);
-      return { success: true, messageId: result.messageId };
-    } else {
-      const errorData = await response.text();
-      console.error('Brevo API error:', response.status, errorData);
-      return { success: false, error: `HTTP ${response.status}: ${errorData}` };
+    if (result.error) {
+      console.error('Resend API error:', result.error);
+      return { success: false, error: result.error.message };
     }
+
+    console.log('Email sent via Resend:', result.data?.id);
+    return { 
+      success: true, 
+      messageId: result.data?.id,
+    };
   } catch (error) {
     console.error('Email error:', error);
     return { success: false, error };
