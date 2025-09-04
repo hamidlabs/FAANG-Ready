@@ -2,11 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, Target, Flame, Trophy, BookOpen, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Flame, Trophy, BookOpen, ArrowRight, Star, Zap, Crown, Bot } from 'lucide-react';
+import { XPBar, StreakDisplay, AchievementGrid, GamificationManager } from '@/components/Gamification';
+import FloatingAIButton from '@/components/FloatingAIButton';
+import CodePlayground from '@/components/CodePlayground';
+import { CelebrationManager } from '@/components/CelebrationAnimations';
+import { StreakMechanicsManager, DailyGoalTracker, WeeklyProgress } from '@/components/StreakMechanics';
+import PWAInstaller from '@/components/PWAInstaller';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAppStore, useUserStats } from '@/lib/store';
+import { toast } from 'sonner';
 
 interface Phase {
   id: number;
@@ -40,10 +51,28 @@ export default function Dashboard() {
   const [phases, setPhases] = useState<Phase[]>([]);
   const [stats, setStats] = useState<UserStats>({ current_streak: 0, longest_streak: 0, total_lessons_completed: 0, total_hours_studied: 0 });
   const [loading, setLoading] = useState(true);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [playgroundOpen, setPlaygroundOpen] = useState(false);
+  const [selectedLessonForPlayground, setSelectedLessonForPlayground] = useState<Lesson | null>(null);
+  
+  const { setUserStats, earnXP, setCodePlaygroundOpen } = useAppStore();
+  const userStats = useUserStats();
 
   useEffect(() => {
     fetchData();
   }, []);
+  
+  // Sync stats with store
+  useEffect(() => {
+    if (stats) {
+      setUserStats({
+        current_streak: stats.current_streak,
+        longest_streak: stats.longest_streak,
+        total_lessons_completed: stats.total_lessons_completed,
+        total_hours_studied: stats.total_hours_studied,
+      });
+    }
+  }, [stats, setUserStats]);
 
   const fetchData = async () => {
     try {
@@ -73,10 +102,22 @@ export default function Dashboard() {
       });
       
       if (response.ok) {
+        // Find the lesson that was toggled
+        const lesson = phases.flatMap(p => p.lessons).find(l => l.id === lessonId);
+        
+        if (lesson && !lesson.completed) {
+          // Lesson was completed - award XP
+          earnXP(50, 'Lesson completed!');
+          toast.success('Great job! +50 XP earned! 🎉', {
+            description: `You completed: ${lesson.title}`,
+          });
+        }
+        
         fetchData(); // Refresh data
       }
     } catch (error) {
       console.error('Error updating progress:', error);
+      toast.error('Failed to update progress. Please try again.');
     }
   };
 
@@ -105,10 +146,24 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"></div>
-          <div className="text-2xl font-bold text-blue-200">Loading your FAANG journey...</div>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <motion.div 
+            className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-400 mx-auto mb-4"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          ></motion.div>
+          <motion.div 
+            className="text-2xl font-bold text-blue-200"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            Loading your FAANG journey...
+          </motion.div>
+        </motion.div>
       </div>
     );
   }
@@ -123,58 +178,236 @@ export default function Dashboard() {
           <div className="text-lg font-semibold text-blue-300">{getMotivationalMessage()}</div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-r from-orange-500 to-red-600 text-white transform hover:scale-105 transition-transform border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-100">Current Streak</p>
-                  <p className="text-3xl font-bold">{stats.current_streak} days</p>
+        {/* Enhanced Stats Cards with Gamification */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, staggerChildren: 0.1 }}
+        >
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="bg-gradient-to-r from-orange-500 to-red-600 text-white border-0 overflow-hidden relative">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between relative z-10">
+                  <div>
+                    <p className="text-orange-100">Current Streak</p>
+                    <p className="text-3xl font-bold">{stats.current_streak} days</p>
+                    {stats.current_streak > 0 && (
+                      <motion.p 
+                        className="text-sm text-orange-200 mt-1"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        Keep it up! 🔥
+                      </motion.p>
+                    )}
+                  </div>
+                  <motion.div
+                    animate={{ rotate: stats.current_streak > 7 ? [0, 10, -10, 0] : 0 }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Flame className="h-12 w-12 text-orange-200" />
+                  </motion.div>
                 </div>
-                <Flame className="h-12 w-12 text-orange-200" />
+                
+                {/* Animated background effect for high streaks */}
+                {stats.current_streak > 7 && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-red-400/20"
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-emerald-100">Completed</p>
+                    <p className="text-3xl font-bold">{completedLessons}/{totalLessons}</p>
+                    <div className="text-xs text-emerald-200 mt-1">
+                      {Math.round(overallProgress)}% Progress
+                    </div>
+                  </div>
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <CheckCircle2 className="h-12 w-12 text-emerald-200" />
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-100">Hours Studied</p>
+                    <p className="text-3xl font-bold">{stats.total_hours_studied}h</p>
+                    <div className="text-xs text-purple-200 mt-1">
+                      Dedication pays off! 💪
+                    </div>
+                  </div>
+                  <Clock className="h-12 w-12 text-purple-200" />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Card className="bg-gradient-to-r from-amber-500 to-orange-600 text-white border-0 relative overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between relative z-10">
+                  <div>
+                    <p className="text-amber-100">Level & XP</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-2xl font-bold">Lv.{userStats.level}</p>
+                      <Crown className="h-6 w-6 text-yellow-300" />
+                    </div>
+                    <div className="text-xs text-amber-200 mt-1">
+                      {userStats.xp_points} XP
+                    </div>
+                  </div>
+                  <motion.div
+                    animate={{ 
+                      y: [0, -5, 0],
+                      rotate: [0, 5, -5, 0] 
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Trophy className="h-12 w-12 text-amber-200" />
+                  </motion.div>
+                </div>
+                
+                {/* Sparkle effect for high levels */}
+                {userStats.level > 5 && (
+                  <motion.div
+                    className="absolute top-2 right-2"
+                    animate={{ scale: [0, 1, 0], rotate: [0, 180, 360] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Star className="h-4 w-4 text-yellow-300" />
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </motion.div>
+        
+        {/* XP Bar */}
+        <motion.div 
+          className="mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-white font-semibold flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-blue-400" />
+                  Experience Progress
+                </h3>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAchievements(!showAchievements)}
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                  >
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Achievements
+                  </Button>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-purple-600 border-purple-500 text-white hover:bg-purple-700"
+                      >
+                        <Target className="h-4 w-4 mr-2" />
+                        Analytics
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-6xl h-[90vh] bg-slate-900 border-slate-700">
+                      <DialogHeader>
+                        <DialogTitle className="text-white text-xl">
+                          📊 Learning Analytics Dashboard
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="flex-1 overflow-y-auto pr-2">
+                        <AnalyticsDashboard />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
+              <XPBar currentXP={userStats.xp_points} level={userStats.level} />
             </CardContent>
           </Card>
-
-          <Card className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white transform hover:scale-105 transition-transform border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-emerald-100">Completed</p>
-                  <p className="text-3xl font-bold">{completedLessons}/{totalLessons}</p>
-                </div>
-                <CheckCircle2 className="h-12 w-12 text-emerald-200" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-purple-500 to-pink-600 text-white transform hover:scale-105 transition-transform border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100">Hours Studied</p>
-                  <p className="text-3xl font-bold">{stats.total_hours_studied}h</p>
-                </div>
-                <Clock className="h-12 w-12 text-purple-200" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-r from-amber-500 to-orange-600 text-white transform hover:scale-105 transition-transform border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-100">Progress</p>
-                  <p className="text-3xl font-bold">{Math.round(overallProgress)}%</p>
-                </div>
-                <Trophy className="h-12 w-12 text-amber-200" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Overall Progress */}
+        </motion.div>
+        
+        {/* Daily Goal and Weekly Progress */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <DailyGoalTracker 
+            completedToday={Math.min(completedLessons, 3)} 
+            dailyGoal={3} 
+          />
+          <WeeklyProgress 
+            weeklyData={[
+              { day: 'Monday', completed: true, lessons: 3 },
+              { day: 'Tuesday', completed: true, lessons: 2 },
+              { day: 'Wednesday', completed: completedLessons >= 1, lessons: Math.min(completedLessons, 2) },
+              { day: 'Thursday', completed: false, lessons: 0 },
+              { day: 'Friday', completed: false, lessons: 0 },
+              { day: 'Saturday', completed: false, lessons: 0 },
+              { day: 'Sunday', completed: false, lessons: 0 },
+            ]}
+          />
+        </motion.div>
+        
+        {/* Achievements Panel */}
+        <AnimatePresence>
+          {showAchievements && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mb-8"
+            >
+              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center gap-2">
+                    <Trophy className="h-6 w-6 text-yellow-500" />
+                    Your Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <AchievementGrid unlockedAchievements={userStats.achievements} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <Card className="mb-8 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
@@ -254,16 +487,41 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         {lesson.completed && (
-                          <div className="text-emerald-400 font-semibold mr-2">
+                          <motion.div 
+                            className="text-emerald-400 font-semibold mr-2"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200 }}
+                          >
                             ✅ Completed
-                          </div>
+                          </motion.div>
                         )}
-                        <Link href={`/lesson/${lesson.id}`}>
-                          <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white">
-                            <BookOpen className="h-4 w-4 mr-2" />
-                            Study
-                            <ArrowRight className="h-4 w-4 ml-2" />
+                        
+                        {/* Code Practice Button */}
+                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => {
+                              setSelectedLessonForPlayground(lesson);
+                              setPlaygroundOpen(true);
+                              setCodePlaygroundOpen(true);
+                            }}
+                            className="bg-purple-600 hover:bg-purple-700 border-purple-500 text-white mr-2"
+                          >
+                            <Bot className="h-4 w-4 mr-2" />
+                            Code
                           </Button>
+                        </motion.div>
+                        
+                        <Link href={`/lesson/${lesson.id}`}>
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white">
+                              <BookOpen className="h-4 w-4 mr-2" />
+                              Study
+                              <ArrowRight className="h-4 w-4 ml-2" />
+                            </Button>
+                          </motion.div>
                         </Link>
                       </div>
                     </div>
@@ -293,6 +551,28 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
+      
+      {/* Interactive Components */}
+      <FloatingAIButton />
+      
+      {/* Code Playground */}
+      <CodePlayground
+        isOpen={playgroundOpen}
+        onClose={() => {
+          setPlaygroundOpen(false);
+          setCodePlaygroundOpen(false);
+        }}
+        problemTitle={selectedLessonForPlayground?.title || 'Coding Practice'}
+        language="javascript"
+      />
+      
+      {/* PWA Installer */}
+      <PWAInstaller />
+      
+      {/* Celebration & Gamification Managers */}
+      <CelebrationManager />
+      <GamificationManager />
+      <StreakMechanicsManager />
     </div>
   );
 }
