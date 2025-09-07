@@ -3,7 +3,7 @@
 -- User progress table (simplified - no lesson foreign key since lessons are file-based)
 CREATE TABLE IF NOT EXISTS user_progress (
   id SERIAL PRIMARY KEY,
-  lesson_id VARCHAR(100) NOT NULL, -- Lesson ID from file discovery (no foreign key)
+  lesson_id VARCHAR(200) NOT NULL, -- Lesson ID from file discovery (increased size for base64 IDs)
   completed_at TIMESTAMP,
   time_spent_minutes INTEGER DEFAULT 0,
   confidence_level INTEGER CHECK (confidence_level >= 1 AND confidence_level <= 5),

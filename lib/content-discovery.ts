@@ -166,8 +166,8 @@ export function discoverContent(contentDir: string = 'content'): Phase[] {
             
             const pathInfo = parseContentPath(relativeFilePath);
             
-            // Generate unique ID from full file path
-            const id = Buffer.from(relativeFilePath).toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 12);
+            // Generate unique ID from full file path (no truncation for uniqueness)
+            const id = Buffer.from(relativeFilePath).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
             
             const contentFile: ContentFile = {
               id,
