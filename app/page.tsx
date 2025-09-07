@@ -169,29 +169,29 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">🚀 FAANG Interview Mastery</h1>
-          <p className="text-xl text-blue-200 mb-4">Your journey to Big Tech success</p>
-          <div className="text-lg font-semibold text-blue-300">{getMotivationalMessage()}</div>
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">🚀 FAANG Interview Mastery</h1>
+          <p className="text-lg sm:text-xl text-blue-200 mb-4">Your journey to Big Tech success</p>
+          <div className="text-base sm:text-lg font-semibold text-blue-300">{getMotivationalMessage()}</div>
         </div>
 
         {/* Enhanced Stats Cards with Gamification */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, staggerChildren: 0.1 }}
         >
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
             <Card className="bg-gradient-to-r from-orange-500 to-red-600 text-white border-0 overflow-hidden relative">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between relative z-10">
                   <div>
-                    <p className="text-orange-100">Current Streak</p>
-                    <p className="text-3xl font-bold">{stats.current_streak} days</p>
+                    <p className="text-orange-100 text-sm sm:text-base">Current Streak</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{stats.current_streak} days</p>
                     {stats.current_streak > 0 && (
                       <motion.p 
                         className="text-sm text-orange-200 mt-1"
@@ -207,7 +207,7 @@ export default function Dashboard() {
                     animate={{ rotate: stats.current_streak > 7 ? [0, 10, -10, 0] : 0 }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <Flame className="h-12 w-12 text-orange-200" />
+                    <Flame className="h-10 w-10 sm:h-12 sm:w-12 text-orange-200" />
                   </motion.div>
                 </div>
                 
@@ -225,11 +225,11 @@ export default function Dashboard() {
 
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
             <Card className="bg-gradient-to-r from-emerald-500 to-blue-600 text-white border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-emerald-100">Completed</p>
-                    <p className="text-3xl font-bold">{completedLessons}/{totalLessons}</p>
+                    <p className="text-emerald-100 text-sm sm:text-base">Completed</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{completedLessons}/{totalLessons}</p>
                     <div className="text-xs text-emerald-200 mt-1">
                       {Math.round(overallProgress)}% Progress
                     </div>
@@ -238,7 +238,7 @@ export default function Dashboard() {
                     animate={{ scale: [1, 1.1, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <CheckCircle2 className="h-12 w-12 text-emerald-200" />
+                    <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-emerald-200" />
                   </motion.div>
                 </div>
               </CardContent>
@@ -247,16 +247,16 @@ export default function Dashboard() {
 
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
             <Card className="bg-gradient-to-r from-purple-500 to-pink-600 text-white border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-purple-100">Hours Studied</p>
-                    <p className="text-3xl font-bold">{stats.total_hours_studied}h</p>
+                    <p className="text-purple-100 text-sm sm:text-base">Hours Studied</p>
+                    <p className="text-2xl sm:text-3xl font-bold">{stats.total_hours_studied}h</p>
                     <div className="text-xs text-purple-200 mt-1">
                       Dedication pays off! 💪
                     </div>
                   </div>
-                  <Clock className="h-12 w-12 text-purple-200" />
+                  <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-purple-200" />
                 </div>
               </CardContent>
             </Card>
@@ -264,12 +264,12 @@ export default function Dashboard() {
 
           <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
             <Card className="bg-gradient-to-r from-amber-500 to-orange-600 text-white border-0 relative overflow-hidden">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between relative z-10">
                   <div>
-                    <p className="text-amber-100">Level & XP</p>
+                    <p className="text-amber-100 text-sm sm:text-base">Level & XP</p>
                     <div className="flex items-center gap-2">
-                      <p className="text-2xl font-bold">Lv.{userStats.level}</p>
+                      <p className="text-xl sm:text-2xl font-bold">Lv.{userStats.level}</p>
                       <Crown className="h-6 w-6 text-yellow-300" />
                     </div>
                     <div className="text-xs text-amber-200 mt-1">
@@ -287,7 +287,7 @@ export default function Dashboard() {
                       ease: "easeInOut"
                     }}
                   >
-                    <Trophy className="h-12 w-12 text-amber-200" />
+                    <Trophy className="h-10 w-10 sm:h-12 sm:w-12 text-amber-200" />
                   </motion.div>
                 </div>
                 
@@ -308,27 +308,27 @@ export default function Dashboard() {
         
         {/* XP Bar */}
         <motion.div 
-          className="mb-8"
+          className="mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
           <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
                 <h3 className="text-white font-semibold flex items-center gap-2">
                   <Zap className="h-5 w-5 text-blue-400" />
-                  Experience Progress
+                  <span className="text-sm sm:text-base">Experience Progress</span>
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAchievements(!showAchievements)}
-                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                    className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600 w-full sm:w-auto"
                   >
                     <Trophy className="h-4 w-4 mr-2" />
-                    Achievements
+                    <span className="text-xs sm:text-sm">Achievements</span>
                   </Button>
                   
                   <Dialog>
@@ -336,15 +336,15 @@ export default function Dashboard() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-purple-600 border-purple-500 text-white hover:bg-purple-700"
+                        className="bg-purple-600 border-purple-500 text-white hover:bg-purple-700 w-full sm:w-auto"
                       >
                         <Target className="h-4 w-4 mr-2" />
-                        Analytics
+                        <span className="text-xs sm:text-sm">Analytics</span>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-6xl h-[90vh] bg-slate-900 border-slate-700">
+                    <DialogContent className="max-w-[95vw] sm:max-w-6xl h-[90vh] bg-slate-900 border-slate-700">
                       <DialogHeader>
-                        <DialogTitle className="text-white text-xl">
+                        <DialogTitle className="text-white text-lg sm:text-xl">
                           📊 Learning Analytics Dashboard
                         </DialogTitle>
                       </DialogHeader>
@@ -362,7 +362,7 @@ export default function Dashboard() {
         
         {/* Daily Goal and Weekly Progress */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
@@ -397,27 +397,27 @@ export default function Dashboard() {
               <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
-                    <Trophy className="h-6 w-6 text-yellow-500" />
-                    Your Achievements
+                    <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />
+                    <span className="text-lg sm:text-xl">Your Achievements</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <AchievementGrid unlockedAchievements={userStats.achievements} />
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
-        <Card className="mb-8 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+        <Card className="mb-6 sm:mb-8 bg-slate-800/50 border-slate-700 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Target className="h-6 w-6" />
-              Overall Progress to FAANG Success
+            <CardTitle className="flex items-center gap-2 text-white text-lg sm:text-xl">
+              <Target className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="break-words">Overall Progress to FAANG Success</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress value={overallProgress} className="h-6 mb-4" />
-            <div className="flex justify-between text-sm text-slate-300">
+            <Progress value={overallProgress} className="h-4 sm:h-6 mb-4" />
+            <div className="flex flex-col sm:flex-row justify-between gap-2 text-xs sm:text-sm text-slate-300">
               <span>{completedLessons} of {totalLessons} lessons completed</span>
               <span className="font-bold text-blue-400">{Math.round(overallProgress)}% Complete</span>
             </div>
@@ -425,45 +425,45 @@ export default function Dashboard() {
         </Card>
 
         {/* Phases */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {phases.map((phase) => (
             <Card key={phase.id} className="overflow-hidden bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800/70 transition-all">
               <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-xl mb-2">{phase.name}</CardTitle>
-                    <p className="text-indigo-100">{phase.description}</p>
-                    <p className="text-sm text-indigo-200 mt-1">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg sm:text-xl mb-2 break-words">{phase.name}</CardTitle>
+                    <p className="text-indigo-100 text-sm sm:text-base break-words">{phase.description}</p>
+                    <p className="text-xs sm:text-sm text-indigo-200 mt-1">
                       Week {phase.week_start}-{phase.week_end}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{phase.completed}/{phase.total}</div>
-                    <div className="text-sm text-indigo-200">lessons</div>
+                  <div className="text-center sm:text-right shrink-0">
+                    <div className="text-xl sm:text-2xl font-bold">{phase.completed}/{phase.total}</div>
+                    <div className="text-xs sm:text-sm text-indigo-200">lessons</div>
                   </div>
                 </div>
                 <Progress 
                   value={phase.total > 0 ? (phase.completed / phase.total) * 100 : 0} 
-                  className="mt-4 bg-indigo-400" 
+                  className="mt-3 sm:mt-4 bg-indigo-400" 
                 />
               </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid gap-4">
+              <CardContent className="p-4 sm:p-6">
+                <div className="grid gap-3 sm:gap-4">
                   {phase.lessons.map((lesson) => (
                     <div
                       key={lesson.id}
-                      className={`flex items-center justify-between p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
+                      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
                         lesson.completed
                           ? 'bg-emerald-900/30 border-emerald-600/50'
                           : 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50'
                       }`}
                     >
-                      <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                         <Button
                           variant={lesson.completed ? "default" : "outline"}
                           size="sm"
                           onClick={() => toggleLesson(lesson.id)}
-                          className={lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-600 hover:bg-slate-500 border-slate-500 text-white"}
+                          className={`shrink-0 ${lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-600 hover:bg-slate-500 border-slate-500 text-white"}`}
                         >
                           {lesson.completed ? (
                             <CheckCircle2 className="h-4 w-4" />
@@ -471,24 +471,24 @@ export default function Dashboard() {
                             <BookOpen className="h-4 w-4" />
                           )}
                         </Button>
-                        <div className="flex-1">
-                          <h4 className={`font-semibold ${lesson.completed ? 'text-emerald-300' : 'text-white'}`}>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`font-semibold text-sm sm:text-base break-words ${lesson.completed ? 'text-emerald-300' : 'text-white'}`}>
                             {lesson.title}
                           </h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0`}>
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mt-1">
+                            <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0 text-xs`}>
                               {lesson.difficulty}
                             </Badge>
-                            <span className="text-sm text-slate-400">
+                            <span className="text-xs sm:text-sm text-slate-400">
                               {lesson.estimated_hours}h estimated
                             </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                         {lesson.completed && (
                           <motion.div 
-                            className="text-emerald-400 font-semibold mr-2"
+                            className="text-emerald-400 font-semibold text-xs sm:text-sm text-center sm:mr-2"
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
                             transition={{ type: "spring", stiffness: 200 }}
@@ -497,32 +497,34 @@ export default function Dashboard() {
                           </motion.div>
                         )}
                         
-                        {/* Code Practice Button */}
-                        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => {
-                              setSelectedLessonForPlayground(lesson);
-                              setPlaygroundOpen(true);
-                              setCodePlaygroundOpen(true);
-                            }}
-                            className="bg-purple-600 hover:bg-purple-700 border-purple-500 text-white mr-2"
-                          >
-                            <Bot className="h-4 w-4 mr-2" />
-                            Code
-                          </Button>
-                        </motion.div>
-                        
-                        <Link href={`/lesson/${lesson.id}`}>
-                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white">
-                              <BookOpen className="h-4 w-4 mr-2" />
-                              Study
-                              <ArrowRight className="h-4 w-4 ml-2" />
+                        <div className="flex gap-2">
+                          {/* Code Practice Button */}
+                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                setSelectedLessonForPlayground(lesson);
+                                setPlaygroundOpen(true);
+                                setCodePlaygroundOpen(true);
+                              }}
+                              className="bg-purple-600 hover:bg-purple-700 border-purple-500 text-white w-full sm:w-auto"
+                            >
+                              <Bot className="h-4 w-4 mr-1 sm:mr-2" />
+                              <span className="text-xs sm:text-sm">Code</span>
                             </Button>
                           </motion.div>
-                        </Link>
+                          
+                          <Link href={`/lesson/${lesson.id}`} className="flex-1 sm:flex-initial">
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
+                              <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white w-full sm:w-auto">
+                                <BookOpen className="h-4 w-4 mr-1 sm:mr-2" />
+                                <span className="text-xs sm:text-sm">Study</span>
+                                <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />
+                              </Button>
+                            </motion.div>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -533,14 +535,14 @@ export default function Dashboard() {
         </div>
 
         {/* Motivational Footer */}
-        <div className="mt-12 text-center">
+        <div className="mt-8 sm:mt-12 text-center">
           <Card className="bg-gradient-to-r from-indigo-700 to-purple-800 text-white border-0">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-bold mb-4">🎯 You're on track to FAANG success!</h3>
-              <p className="text-lg text-indigo-100 mb-4">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">🎯 You're on track to FAANG success!</h3>
+              <p className="text-base sm:text-lg text-indigo-100 mb-3 sm:mb-4">
                 Every lesson completed brings you closer to your dream job. Keep going! 💪
               </p>
-              <div className="text-sm text-indigo-200">
+              <div className="text-xs sm:text-sm text-indigo-200">
                 {overallProgress < 100 ? (
                   `Only ${Math.ceil((100 - overallProgress) / 100 * totalLessons)} lessons left to complete your journey!`
                 ) : (
