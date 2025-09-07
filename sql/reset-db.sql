@@ -1,5 +1,14 @@
--- FAANG Prep Progress Tracking Schema (File-based Content Discovery)
+-- Reset database for file-based content discovery
+-- This will clean up all old lesson data and prepare for new system
 
+-- Drop old tables that are no longer needed
+DROP TABLE IF EXISTS lessons CASCADE;
+DROP TABLE IF EXISTS phases CASCADE;
+
+-- Clean up user progress table (keep data but ensure structure is correct)
+DROP TABLE IF EXISTS user_progress CASCADE;
+
+-- Create the new simplified schema
 -- User progress table (simplified - no lesson foreign key since lessons are file-based)
 CREATE TABLE IF NOT EXISTS user_progress (
   id SERIAL PRIMARY KEY,
@@ -24,9 +33,6 @@ CREATE TABLE IF NOT EXISTS user_stats (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- No need for phases or lessons table inserts - everything is file-based now
--- Content discovery handles all phase and lesson metadata
 
 -- Initialize user stats
 INSERT INTO user_stats (current_streak, longest_streak, total_lessons_completed, total_hours_studied) 

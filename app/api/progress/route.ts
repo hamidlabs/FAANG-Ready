@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { sendEmail, emailTemplates } from '@/lib/email';
+import { getLessonById, discoverContent } from '@/lib/content-discovery';
 
 export async function POST(request: Request) {
   try {
@@ -140,13 +141,22 @@ async function updateUserStats(client: any, lessonId: string, wasJustCompleted: 
     'SELECT COUNT(*) FROM user_progress WHERE completed_at IS NOT NULL'
   );
   
-  // Calculate total hours (estimate based on completed lessons)
-  const hoursResult = await client.query(`
-    SELECT SUM(l.estimated_hours) as total_hours
-    FROM lessons l
-    JOIN user_progress up ON l.id = up.lesson_id
-    WHERE up.completed_at IS NOT NULL
+  // Get completed lesson IDs to calculate total hours using content discovery
+  const completedLessons = await client.query(`
+    SELECT lesson_id FROM user_progress WHERE completed_at IS NOT NULL
   `);
+  
+  // Calculate total hours using content discovery
+  let totalHours = 0;
+  const phases = discoverContent();
+  const allLessons = phases.flatMap(phase => phase.lessons);
+  
+  for (const progress of completedLessons.rows) {
+    const lesson = allLessons.find(l => l.id === progress.lesson_id);
+    if (lesson) {
+      totalHours += lesson.estimated_hours || 2;
+    }
+  }
   
   // Calculate streak (simplified - consecutive days with completions)
   const today = new Date().toISOString().split('T')[0];
@@ -188,7 +198,7 @@ async function updateUserStats(client: any, lessonId: string, wasJustCompleted: 
       updated_at = CURRENT_TIMESTAMP
   `, [
     parseInt(completedCount.rows[0].count),
-    parseInt(hoursResult.rows[0].total_hours || 0),
+    totalHours,
     currentStreak
   ]);
   
@@ -196,6 +206,6 @@ async function updateUserStats(client: any, lessonId: string, wasJustCompleted: 
     wasJustCompleted,
     currentStreak,
     totalCompleted: parseInt(completedCount.rows[0].count),
-    totalHours: parseInt(hoursResult.rows[0].total_hours || 0),
+    totalHours,
   };
 }
