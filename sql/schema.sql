@@ -64,6 +64,7 @@ INSERT INTO lessons (phase_id, title, file_path, estimated_hours, difficulty, or
 (1, 'Interview Conversation Scripts', 'Phase 1 - English Communication Foundation/02-interview-conversation-scripts/main.md', 4, 'medium', 2),
 (1, 'Code Explanation Framework', 'Phase 1 - English Communication Foundation/03-code-explanation-framework/main.md', 3, 'medium', 3),
 (1, 'Behavioral Answer Templates', 'Phase 1 - English Communication Foundation/04-behavioral-answer-templates/main.md', 4, 'medium', 4),
+(1, 'Complete Behavioral Interview Mastery', 'Phase 1 - English Communication Foundation/05-complete-behavioral-interview-mastery/main.md', 5, 'medium', 5),
 
 -- Phase 2
 (2, 'Universal Problem-Solving Method', 'Phase 2 - Problem-Solving Mental Framework/05-universal-problem-solving-method/main.md', 4, 'medium', 1),
