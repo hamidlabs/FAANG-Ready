@@ -31,11 +31,154 @@ What I enjoy most about development is solving complex problems and optimizing p
 
 **Q**: "What technologies are you most comfortable with?"
 
-**A**: "I'm most comfortable with the JavaScript ecosystem. On the frontend, I use Next.js with React, and I've worked with TypeScript for better code reliability. For the backend, I primarily use Express.js to build RESTful APIs. I'm experienced with both SQL databases using Prisma/Drizzle ORM and have deployed applications to various platforms like Vercel, Netlify, and VPS servers. I'm also comfortable with modern deployment practices and have experience with [specific tools you've used]."
+**A**: "I'm most comfortable with the JavaScript ecosystem. On the frontend, I use Next.js with React, and I've worked with TypeScript for better code reliability. For the backend, I primarily use Express.js to build RESTful APIs. I'm experienced with both SQL databases - I've worked with both Prisma and Drizzle ORM, and I can explain the trade-offs between them based on project requirements. I've also implemented caching strategies using Redis and have experience with load balancing solutions for high-traffic applications. I deploy applications to various platforms like Vercel, Netlify, and VPS servers with proper monitoring and scaling configurations."
 
 ---
 
-## Script 2: Coding Problem Introduction
+## Script 2: Workplace Relationship Questions
+
+### Manager Relationship Questions
+
+**Interviewer**: "How was your relationship with your previous manager?"
+
+**Candidate Response Template**:
+```
+"I've been fortunate to work with some really supportive managers throughout my career. My relationship with my previous manager was excellent - we had a great balance of autonomy and guidance.
+
+We established a routine of weekly one-on-ones where I'd update them on project progress and discuss any technical challenges I was facing. They were particularly helpful when I was implementing complex features like our caching system - they provided strategic guidance while trusting me to make the technical decisions.
+
+What I appreciated most was their feedback style. They'd give specific, actionable suggestions that helped me grow. For example, when I was optimizing our database queries, they helped me think about the broader performance implications and encouraged me to document my findings for the rest of the team.
+
+Our collaboration resulted in successful delivery of several high-impact projects, and they often relied on my technical expertise for architecture decisions. It was the kind of relationship where we both learned from each other."
+```
+
+**Follow-up Questions & Responses**:
+
+**Q**: "Tell me about a time you disagreed with your manager."
+
+**A**: "That's a thoughtful question. I remember a situation where we had different perspectives on a technical approach for handling traffic spikes. My manager wanted to implement a quick scaling solution to meet an immediate deadline, but I felt this approach would create performance issues as our user base grew. I scheduled a meeting where I prepared a clear comparison of both approaches, including long-term maintenance costs and scalability implications. I presented data showing how the quick solution might cause problems at higher traffic volumes. My manager appreciated the thorough analysis, and we decided to go with the more robust solution with a slightly adjusted timeline. The feature launched successfully and has handled our traffic growth without issues, which strengthened our working relationship because they saw I was thinking about long-term success."
+
+**Q**: "What did you learn from your manager?"
+
+**A**: "Good question. My manager taught me a lot about balancing technical excellence with business priorities. While I was focused on optimizing code and implementing the most elegant solutions, they helped me understand how to communicate technical decisions in terms of business impact. For example, when I was choosing between Drizzle and Prisma for a project, they encouraged me to present not just the technical trade-offs, but also the implications for development speed, team onboarding, and long-term maintenance. This perspective has made me much more effective at justifying technical decisions and has improved how I collaborate with product teams."
+
+### Colleague Relationship Questions
+
+**Interviewer**: "Describe your relationship with your teammates."
+
+**Candidate Response Template**:
+```
+"I really value collaborative relationships with my teammates, and I've always focused on building supportive working relationships.
+
+In my recent role, I worked closely with both frontend and backend developers on cross-functional teams. I made it a point to share my knowledge about system optimization and caching strategies when teammates were facing performance challenges. I also organized informal knowledge-sharing sessions where we'd discuss new technologies and best practices.
+
+For example, when a colleague was struggling with database performance issues, I spent time pair programming with them to implement better indexing and query optimization. Similarly, when I was learning advanced TypeScript patterns, other team members were supportive and shared their expertise.
+
+Our collaborative approach resulted in faster problem-solving, better code quality, and a really positive team culture where everyone felt comfortable asking questions and sharing ideas. I believe this kind of mutual support is essential for both individual growth and team success."
+```
+
+**Q**: "Tell me about a difficult coworker and how you handled it."
+
+**A**: "That's a fair question. I remember a situation where different working styles created some challenges. I was working with a colleague who had a tendency to make technical decisions without discussing them with the team first. This sometimes created integration issues when their code conflicted with the architecture decisions we'd made collectively. Rather than let frustration build up, I decided to address this professionally. I scheduled a private conversation where I focused on process improvements rather than personal criticism. I suggested that we implement brief daily syncs where we'd share what technical approaches we were taking for our respective tasks. The colleague was actually receptive to this approach - it turned out they were working in isolation because they thought it would be faster. Once we established regular communication, our collaboration improved significantly, and we ended up learning from each other's expertise. It taught me that most workplace challenges can be resolved with direct, respectful communication."
+
+### Job Transition Questions
+
+**Interviewer**: "Why did you leave your last job?"
+
+**Candidate Response Template**:
+```
+"Great question. My decision to leave was really about seeking new growth opportunities and technical challenges.
+
+I really enjoyed my previous role and learned a lot about system optimization, caching strategies, and database performance. However, I reached a point where I wanted to work on larger-scale systems and more complex distributed architecture challenges.
+
+In my last position, I had successfully implemented several performance improvements - like optimizing our caching layer and improving database query efficiency - but I was interested in working with microservices architecture and handling traffic at a much larger scale, which wasn't part of our current tech roadmap.
+
+I'm looking for an opportunity where I can apply my existing expertise in performance optimization while also learning new technologies and working on systems that serve millions of users rather than thousands. That's what attracted me to this role - the chance to work on complex, large-scale technical problems while contributing my experience with system performance and scalability."
+```
+
+**Q**: "What didn't you like about your previous role?"
+
+**A**: "That's a thoughtful question. Overall, I enjoyed my role and learned a lot, but there were some aspects I'd like to see different in my next position. One area was the scope of technical challenges - we had optimized our system quite well, but I was interested in working on more complex distributed systems and microservices architecture, which wasn't part of our technology direction. I also wanted more opportunities to mentor junior developers and contribute to architectural decisions. While I was able to share knowledge informally, the team structure didn't provide formal leadership opportunities. Additionally, I was interested in working with newer technologies that could help me grow my skill set, but our technology stack was quite stable. This role excites me because it addresses all those areas I'm looking to develop."
+
+---
+
+## Script 3: Coding Problem Introduction
+
+### Advanced Technical Problem Discussion
+
+**Interviewer**: "Tell me about a complex technical challenge you solved."
+
+**Candidate Response Template**:
+```
+"That's a great question. Let me tell you about a performance challenge that required both technical skills and strategic thinking.
+
+The situation was that our application was experiencing slow response times during peak hours - we were seeing 3-4 second load times when traffic spiked above our normal capacity.
+
+My task was to identify the bottleneck and implement a solution that would handle traffic growth without disrupting the user experience.
+
+For my approach, I first analyzed our system architecture and identified that we were making inefficient database queries. I decided to implement a multi-layered solution: First, I optimized our database queries and migrated from Prisma to Drizzle for better query control. Second, I implemented a Redis caching layer for frequently accessed data. Third, I set up load balancing across multiple server instances to distribute the traffic more effectively.
+
+The interesting part was designing the caching invalidation strategy - I needed to ensure data stayed fresh while maximizing cache hits during traffic spikes.
+
+The result was impressive - response times dropped from 3-4 seconds to under 200ms, and the system now handles 10x more concurrent users without performance degradation. That solution is still running in production today and has become our standard approach for similar challenges."
+```
+
+### Leadership & Initiative Questions
+
+**Interviewer**: "Tell me about a time you led an initiative or mentored someone."
+
+**Candidate Response Template**:
+```
+"Good question. I remember when I led the implementation of a new caching strategy that significantly improved our application performance.
+
+The situation was that our team was experiencing inconsistent response times, and several junior developers were struggling to understand why their features were performing poorly in production.
+
+I took the initiative to research caching solutions and proposed implementing a Redis-based caching layer. But more importantly, I saw this as an opportunity to educate the team about performance optimization principles.
+
+I organized a series of knowledge-sharing sessions where I explained caching concepts, demonstrated the implementation, and created documentation that the team could reference. I also paired with junior developers to help them understand how their code choices affected performance.
+
+The result was that we not only improved our response times by 60%, but the entire team became much more performance-conscious in their development approach. Several team members have since told me that those sessions changed how they think about writing efficient code.
+
+I believe sharing knowledge and helping others grow is one of the most rewarding aspects of being a senior developer."
+```
+
+### Growth & Learning Questions
+
+**Interviewer**: "Tell me about a time you failed and what you learned."
+
+**Candidate Response Template**:
+```
+"I appreciate that question because failures are often our best learning opportunities. Early in my career, I underestimated the complexity of implementing a real-time caching system for a high-traffic application.
+
+I was overly confident in my technical skills and didn't properly research the challenges of cache invalidation and consistency. I promised a two-week delivery timeline without fully understanding the edge cases involved.
+
+When I started implementation, I discovered complex scenarios around cache synchronization that I hadn't anticipated. The project took nearly six weeks instead of two, which delayed other team initiatives.
+
+However, this experience taught me incredibly valuable lessons. First, I now always do thorough research and prototyping before committing to timelines on unfamiliar technology. Second, I learned to communicate uncertainty early rather than discovering it mid-project. Third, I developed a much deeper understanding of caching systems that has served me well in every role since.
+
+Now, when I encounter similar complex technical challenges, I approach them with proper planning, realistic timelines, and proactive communication about potential challenges. That experience made me a much more reliable and thoughtful developer."
+```
+
+### Career Goals & Future Vision
+
+**Interviewer**: "Where do you see yourself in 5 years?"
+
+**Candidate Response Template**:
+```
+"That's something I think about regularly and am excited to discuss. In five years, I see myself as a senior technical contributor who's known for expertise in system architecture and performance optimization.
+
+From a technical perspective, I want to be an expert in distributed systems and large-scale architecture. I'd love to be the person the team turns to when they're facing complex scalability challenges or need to design systems that can handle millions of users.
+
+I also see myself in a mentoring role, helping to develop junior engineers and contributing to technical decision-making at an organizational level. I'm passionate about sharing knowledge and helping teams build better, more efficient systems.
+
+Ideally, I'd be working on products that have significant user impact - systems that millions of people depend on daily. I want to contribute to technology that makes a real difference in people's lives.
+
+In terms of leadership, I'd like to be leading technical initiatives and helping to shape the engineering culture at a company that values innovation and technical excellence, which is why this opportunity excites me so much."
+```
+
+---
+
+## Script 4: Technical Problem Solving
 
 ### Typical Coding Question Setup
 
@@ -60,7 +203,7 @@ Alright, let me think through this step by step. I'll start by explaining my app
 
 **Candidate Thought Process (Say out loud)**:
 ```
-"Looking at this problem, I notice [specific pattern or characteristic]. This reminds me of [similar problem type or pattern].
+"Looking at this problem, I notice [specific pattern or characteristic]. This reminds me of [similar problem type or pattern] that I've solved before.
 
 My approach will be:
 1. [First step with brief explanation]
@@ -69,20 +212,24 @@ My approach will be:
 
 Let me start with a simple example to verify my understanding. If the input is [example], then [trace through expected output].
 
-I think [specific algorithm/technique] would work well here because [reasoning]. The time complexity should be O([complexity]) and space complexity O([complexity]).
+I think [specific algorithm/technique] would work well here because [reasoning]. Based on my experience with similar optimization problems, the time complexity should be O([complexity]) and space complexity O([complexity]).
+
+This approach is similar to optimizations I've implemented in production systems - the key is [specific insight from your experience].
 
 Let me start coding this up..."
 ```
 
+### Connecting to Your Experience
+
 **While Coding (Keep talking)**:
 ```
-"I'll start by setting up the basic structure..."
-"Here I'm initializing [variable] to track [purpose]..."
-"This loop iterates through [data structure] to [purpose]..."
-"I'm using this condition to check [specific case]..."
-"Let me add a comment here to explain this logic..."
-"Actually, let me trace through this with an example to make sure it works..."
+"I'll start by setting up the basic structure - this is similar to how I structure functions in my TypeScript projects..."
+"Here I'm initializing [variable] to track [purpose] - I use this pattern frequently when optimizing database queries..."
+"This loop reminds me of the caching logic I implemented where we needed to iterate through data efficiently..."
+"I'm using this condition to check [specific case] - this is similar to validation logic I use in my Express APIs..."
+"Let me add a comment here to explain this logic - documentation is something I always prioritize in production code..."
 ```
+
 
 ### Testing Your Solution
 
