@@ -1,3 +1,0 @@
--- This file is no longer needed since we use file-based content discovery
--- Content paths are automatically discovered from the file system
--- No database updates required for content management
