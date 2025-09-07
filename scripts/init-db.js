@@ -2,12 +2,54 @@ const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-async function initializeDatabase() {
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+// Load environment variables
+require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
+
+async function createDatabaseIfNotExists() {
+  const dbUrl = new URL(process.env.DATABASE_URL);
+  const dbName = dbUrl.pathname.slice(1); // Remove leading '/'
+  
+  // Connect to postgres database to create target database
+  const adminDbUrl = new URL(process.env.DATABASE_URL);
+  adminDbUrl.pathname = '/postgres'; // Connect to default postgres db
+  
+  const adminPool = new Pool({
+    connectionString: adminDbUrl.toString(),
   });
 
   try {
+    const client = await adminPool.connect();
+    
+    // Check if database exists
+    const result = await client.query(
+      'SELECT 1 FROM pg_database WHERE datname = $1',
+      [dbName]
+    );
+    
+    if (result.rows.length === 0) {
+      console.log(`🔧 Creating database "${dbName}"...`);
+      await client.query(`CREATE DATABASE "${dbName}"`);
+      console.log(`✅ Database "${dbName}" created successfully!`);
+    } else {
+      console.log(`📋 Database "${dbName}" already exists`);
+    }
+    
+    client.release();
+  } finally {
+    await adminPool.end();
+  }
+}
+
+async function initializeDatabase() {
+  try {
+    // First, create database if it doesn't exist
+    await createDatabaseIfNotExists();
+    
+    // Now connect to the target database
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+
     const client = await pool.connect();
     
     // Read and execute reset script first (cleans up old structure)
@@ -28,11 +70,11 @@ async function initializeDatabase() {
     console.log('📁 Content is now automatically discovered from the content/ directory');
     
     client.release();
+    await pool.end();
   } catch (error) {
     console.error('❌ Error initializing database:', error);
     console.error('Make sure your DATABASE_URL is correct in .env.local');
-  } finally {
-    await pool.end();
+    console.error('If using a cloud database, make sure you have CREATE DATABASE permissions');
   }
 }
 
