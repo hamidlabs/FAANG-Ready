@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "init-db": "node scripts/init-db.js",
-    "update-paths": "node scripts/update-paths.js"
+    "init-db": "node scripts/init-db.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -30,6 +29,7 @@
     "clsx": "^2.0.0",
     "dotenv": "^17.2.1",
     "framer-motion": "^12.23.12",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.294.0",
     "monaco-editor": "^0.52.2",
     "next": "14.0.4",

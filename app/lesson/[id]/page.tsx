@@ -12,7 +12,6 @@ import remarkGfm from 'remark-gfm';
 interface Lesson {
   id: number;
   title: string;
-  file_path: string;
   estimated_hours: number;
   difficulty: string;
   completed: boolean;
@@ -36,8 +35,8 @@ export default function LessonPage({ params }: { params: { id: string } }) {
 
       setLesson(lessonData);
 
-      // Fetch markdown content
-      const contentResponse = await fetch(`/api/content?path=${encodeURIComponent(lessonData.file_path)}`);
+      // Fetch markdown content using lesson ID
+      const contentResponse = await fetch(`/api/content?lessonId=${params.id}`);
       const contentData = await contentResponse.text();
       setContent(contentData);
     } catch (error) {

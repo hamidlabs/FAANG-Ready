@@ -44,17 +44,22 @@ export async function POST(request: Request) {
     // Update user stats
     const updatedStats = await updateUserStats(client, lessonId, wasJustCompleted);
     
-    // Get lesson details for email
-    const lessonQuery = await client.query(
-      'SELECT title FROM lessons WHERE id = $1',
-      [lessonId]
-    );
-    
     client.release();
     
+    // Get lesson details from content discovery for email
+    let lessonTitle = 'Unknown Lesson';
+    try {
+      const { getLessonById } = await import('@/lib/content-discovery');
+      const lesson = getLessonById(lessonId);
+      if (lesson) {
+        lessonTitle = lesson.title;
+      }
+    } catch (error) {
+      console.error('Could not get lesson title:', error);
+    }
+    
     // Send congratulatory email when lesson is completed (non-blocking)
-    if (lessonQuery.rows.length > 0 && updatedStats.wasJustCompleted) {
-      const lessonTitle = lessonQuery.rows[0].title;
+    if (updatedStats.wasJustCompleted) {
       const streak = updatedStats.currentStreak;
       
       console.log(`🎉 Lesson completed: "${lessonTitle}" - Streak: ${streak} days`);
