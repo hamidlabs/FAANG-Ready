@@ -2,6 +2,10 @@ node_modules
 .next
 .env
 .env.local
-*.md
+# Exclude specific markdown files but include content
+/*.md
+plans.md
+ORGANIZATION_STATUS.md
+!content/**/*.md
 .claude
 pnpm-lock.yaml
