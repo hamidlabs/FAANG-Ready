@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 import { CheckCircle, Star, ArrowRight } from 'lucide-react'
+
+// Import highlight.js CSS for syntax highlighting
+import 'highlight.js/styles/github-dark.css'
 
 interface ContentViewProps {
   selectedFile: string | null
@@ -92,6 +96,7 @@ Start by selecting any topic from the sidebar to begin your journey!`)
         <div className="max-w-4xl mx-auto p-8">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
             className="prose prose-invert prose-lg max-w-none"
             components={{
               h1: ({children}) => <h1 className="text-4xl font-bold mb-8 text-white">{children}</h1>,
@@ -102,11 +107,25 @@ Start by selecting any topic from the sidebar to begin your journey!`)
               ul: ({children}) => <ul className="mb-6 ml-6 space-y-3">{children}</ul>,
               ol: ({children}) => <ol className="mb-6 ml-6 space-y-3">{children}</ol>,
               li: ({children}) => <li className="text-gray-300 text-lg">{children}</li>,
-              code: ({inline, children, ...props}: any) => 
-                inline ? 
-                  <code className="bg-gray-800 px-2 py-1 rounded text-green-400 text-base font-mono">{children}</code> :
-                  <code className="text-gray-300">{children}</code>,
-              pre: ({children}) => <pre className="bg-gray-800 p-6 rounded-lg overflow-x-auto mb-6 border border-gray-700">{children}</pre>,
+              code: ({inline, children, className, ...props}: any) => {
+                if (inline) {
+                  return (
+                    <code className="bg-gray-800 px-3 py-1 rounded-md text-green-400 text-lg font-mono font-medium border border-gray-600">
+                      {children}
+                    </code>
+                  );
+                }
+                return (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                );
+              },
+              pre: ({children}) => (
+                <pre className="bg-gray-900 p-6 rounded-lg overflow-x-auto mb-6 border border-gray-600 shadow-lg">
+                  {children}
+                </pre>
+              ),
               blockquote: ({children}) => <blockquote className="border-l-4 border-blue-500 pl-6 italic text-gray-400 mb-6 bg-gray-800/30 py-4 rounded-r-lg">{children}</blockquote>,
               table: ({children}) => <table className="w-full border-collapse mb-6 border border-gray-700 rounded-lg overflow-hidden">{children}</table>,
               th: ({children}) => <th className="border border-gray-700 px-4 py-3 text-left bg-gray-800 font-semibold text-white">{children}</th>,

@@ -8,6 +8,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+
+// Import highlight.js CSS for syntax highlighting
+import 'highlight.js/styles/github-dark.css';
 
 interface Lesson {
   id: number;
@@ -153,15 +157,39 @@ export default function LessonPage({ params }: { params: { id: string } }) {
                           prose-headings:text-blue-200 prose-headings:font-bold
                           prose-p:text-slate-300 prose-p:leading-relaxed
                           prose-strong:text-white prose-strong:font-semibold
-                          prose-code:bg-slate-700 prose-code:text-blue-300 prose-code:px-1 prose-code:py-0.5 sm:prose-code:px-2 sm:prose-code:py-1 prose-code:rounded prose-code:text-xs sm:prose-code:text-sm
-                          prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-pre:overflow-x-auto prose-pre:text-xs sm:prose-pre:text-sm
+                          prose-code:bg-slate-700 prose-code:text-green-400 prose-code:px-3 prose-code:py-1.5 prose-code:rounded-md prose-code:text-base prose-code:font-medium prose-code:border prose-code:border-slate-600
+                          prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-600 prose-pre:overflow-x-auto prose-pre:text-sm prose-pre:shadow-lg
                           prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-slate-800/50 prose-blockquote:pl-4
                           prose-ul:text-slate-300 prose-ol:text-slate-300
                           prose-li:text-slate-300 prose-li:my-1
                           prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
                           prose-table:text-sm prose-th:text-xs prose-td:text-xs sm:prose-th:text-sm sm:prose-td:text-sm
                           prose-img:rounded-lg prose-img:shadow-lg">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+                components={{
+                  code: ({inline, children, className, ...props}: any) => {
+                    if (inline) {
+                      return (
+                        <code className="bg-slate-700 text-green-400 px-3 py-1.5 rounded-md text-base font-medium font-mono border border-slate-600">
+                          {children}
+                        </code>
+                      );
+                    }
+                    return (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                  pre: ({children}) => (
+                    <pre className="bg-slate-900 p-6 rounded-lg overflow-x-auto border border-slate-600 shadow-lg">
+                      {children}
+                    </pre>
+                  ),
+                }}
+              >
                 {content}
               </ReactMarkdown>
             </div>
