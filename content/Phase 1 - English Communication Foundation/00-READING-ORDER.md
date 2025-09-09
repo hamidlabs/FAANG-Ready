@@ -2,8 +2,13 @@
 
 ## 📚 How to Study This Phase
 
-Read the lessons in this exact order for maximum learning effectiveness: nice by
-hmd`
+Read the lessons in this exact order for maximum learning effectiveness:
+
+### Lesson 0: Introduction & Self-Introduction Mastery (START HERE!)
+
+**Directory**: `00-introduction-and-self-introduction-mastery/`
+
+1. `01-complete-introduction-system.md` - Master "Tell me about yourself" and conversation starters
 
 ### Lesson 1: Interview Sentence Starters Mastery
 
@@ -52,10 +57,11 @@ hmd`
 
 ## ✅ Progress Tracking
 
+- [ ] Lesson 0: Introduction & Self-Introduction Mastery (1 file) - **START HERE!**
 - [ ] Lesson 1: Interview Sentence Starters Mastery (4 files)
 - [ ] Lesson 2: Perfect Interview Endings (2 files)
 - [ ] Lesson 3: Complete Behavioral Question System (2 files)
 - [ ] Lesson 4: Technical Interview Communication (2 files)
 - [ ] Lesson 5: Master Interview Success System (1 file)
 
-**Total**: 11 files to master in Phase 1
+**Total**: 12 files to master in Phase 1
