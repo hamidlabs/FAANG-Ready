@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Clock, Target, Flame, Trophy, BookOpen, ArrowRight, Star, Zap, Crown, Bot } from 'lucide-react';
+import { CheckCircle2, Clock, Target, Flame, Trophy, BookOpen, ArrowRight, Star, Zap, Crown, Bot, ChevronDown, ChevronUp } from 'lucide-react';
 import { XPBar, StreakDisplay, AchievementGrid, GamificationManager } from '@/components/Gamification';
 import FloatingAIButton from '@/components/FloatingAIButton';
 import CodePlayground from '@/components/CodePlayground';
@@ -54,12 +54,18 @@ export default function Dashboard() {
   const [showAchievements, setShowAchievements] = useState(false);
   const [playgroundOpen, setPlaygroundOpen] = useState(false);
   const [selectedLessonForPlayground, setSelectedLessonForPlayground] = useState<Lesson | null>(null);
+  const [collapsedPhases, setCollapsedPhases] = useState<Set<number>>(new Set());
   
   const { setUserStats, earnXP, setCodePlaygroundOpen } = useAppStore();
   const userStats = useUserStats();
 
   useEffect(() => {
     fetchData();
+    // Load collapsed phases from localStorage
+    const savedCollapsedPhases = localStorage.getItem('collapsedPhases');
+    if (savedCollapsedPhases) {
+      setCollapsedPhases(new Set(JSON.parse(savedCollapsedPhases)));
+    }
   }, []);
   
   // Sync stats with store
@@ -119,6 +125,18 @@ export default function Dashboard() {
       console.error('Error updating progress:', error);
       toast.error('Failed to update progress. Please try again.');
     }
+  };
+
+  const togglePhaseCollapse = (phaseId: number) => {
+    const newCollapsedPhases = new Set(collapsedPhases);
+    if (collapsedPhases.has(phaseId)) {
+      newCollapsedPhases.delete(phaseId);
+    } else {
+      newCollapsedPhases.add(phaseId);
+    }
+    setCollapsedPhases(newCollapsedPhases);
+    // Save to localStorage
+    localStorage.setItem('collapsedPhases', JSON.stringify(Array.from(newCollapsedPhases)));
   };
 
   const totalLessons = phases.reduce((sum, phase) => sum + phase.total, 0);
@@ -426,112 +444,138 @@ export default function Dashboard() {
 
         {/* Phases */}
         <div className="space-y-4 sm:space-y-6">
-          {phases.map((phase) => (
-            <Card key={phase.id} className="overflow-hidden bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800/70 transition-all">
-              <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white">
-                <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg sm:text-xl mb-2 break-words">{phase.name}</CardTitle>
-                    <p className="text-indigo-100 text-sm sm:text-base break-words">{phase.description}</p>
-                    <p className="text-xs sm:text-sm text-indigo-200 mt-1">
-                      Week {phase.week_start}-{phase.week_end}
-                    </p>
-                  </div>
-                  <div className="text-center sm:text-right shrink-0">
-                    <div className="text-xl sm:text-2xl font-bold">{phase.completed}/{phase.total}</div>
-                    <div className="text-xs sm:text-sm text-indigo-200">lessons</div>
-                  </div>
-                </div>
-                <Progress 
-                  value={phase.total > 0 ? (phase.completed / phase.total) * 100 : 0} 
-                  className="mt-3 sm:mt-4 bg-indigo-400" 
-                />
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <div className="grid gap-3 sm:gap-4">
-                  {phase.lessons.map((lesson) => (
-                    <div
-                      key={lesson.id}
-                      className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
-                        lesson.completed
-                          ? 'bg-emerald-900/30 border-emerald-600/50'
-                          : 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                        <Button
-                          variant={lesson.completed ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => toggleLesson(lesson.id)}
-                          className={`shrink-0 ${lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-600 hover:bg-slate-500 border-slate-500 text-white"}`}
+          {phases.map((phase) => {
+            const isCollapsed = collapsedPhases.has(phase.id);
+            return (
+              <Card key={phase.id} className="overflow-hidden bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800/70 transition-all">
+                <CardHeader 
+                  className="bg-gradient-to-r from-indigo-600 to-purple-700 text-white cursor-pointer hover:from-indigo-500 hover:to-purple-600 transition-all"
+                  onClick={() => togglePhaseCollapse(phase.id)}
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <CardTitle className="text-lg sm:text-xl mb-2 break-words">{phase.name}</CardTitle>
+                        <motion.div
+                          animate={{ rotate: isCollapsed ? 180 : 0 }}
+                          transition={{ duration: 0.2 }}
                         >
-                          {lesson.completed ? (
-                            <CheckCircle2 className="h-4 w-4" />
-                          ) : (
-                            <BookOpen className="h-4 w-4" />
-                          )}
-                        </Button>
-                        <div className="flex-1 min-w-0">
-                          <h4 className={`font-semibold text-sm sm:text-base break-words ${lesson.completed ? 'text-emerald-300' : 'text-white'}`}>
-                            {lesson.title}
-                          </h4>
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mt-1">
-                            <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0 text-xs`}>
-                              {lesson.difficulty}
-                            </Badge>
-                            <span className="text-xs sm:text-sm text-slate-400">
-                              {lesson.estimated_hours}h estimated
-                            </span>
-                          </div>
-                        </div>
+                          <ChevronDown className="h-5 w-5 text-indigo-200" />
+                        </motion.div>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                        {lesson.completed && (
-                          <motion.div 
-                            className="text-emerald-400 font-semibold text-xs sm:text-sm text-center sm:mr-2"
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ type: "spring", stiffness: 200 }}
-                          >
-                            ✅ Completed
-                          </motion.div>
-                        )}
-                        
-                        <div className="flex gap-2">
-                          {/* Code Practice Button */}
-                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => {
-                                setSelectedLessonForPlayground(lesson);
-                                setPlaygroundOpen(true);
-                                setCodePlaygroundOpen(true);
-                              }}
-                              className="bg-purple-600 hover:bg-purple-700 border-purple-500 text-white w-full sm:w-auto"
-                            >
-                              <Bot className="h-4 w-4 mr-1 sm:mr-2" />
-                              <span className="text-xs sm:text-sm">Code</span>
-                            </Button>
-                          </motion.div>
-                          
-                          <Link href={`/lesson/${lesson.id}`} className="flex-1 sm:flex-initial">
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
-                              <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white w-full sm:w-auto">
-                                <BookOpen className="h-4 w-4 mr-1 sm:mr-2" />
-                                <span className="text-xs sm:text-sm">Study</span>
-                                <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />
-                              </Button>
-                            </motion.div>
-                          </Link>
-                        </div>
-                      </div>
+                      <p className="text-indigo-100 text-sm sm:text-base break-words">{phase.description}</p>
+                      <p className="text-xs sm:text-sm text-indigo-200 mt-1">
+                        Week {phase.week_start}-{phase.week_end}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <div className="text-center sm:text-right shrink-0">
+                      <div className="text-xl sm:text-2xl font-bold">{phase.completed}/{phase.total}</div>
+                      <div className="text-xs sm:text-sm text-indigo-200">lessons</div>
+                    </div>
+                  </div>
+                  <Progress 
+                    value={phase.total > 0 ? (phase.completed / phase.total) * 100 : 0} 
+                    className="mt-3 sm:mt-4 bg-indigo-400" 
+                  />
+                </CardHeader>
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      style={{ overflow: "hidden" }}
+                    >
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="grid gap-3 sm:gap-4">
+                          {phase.lessons.map((lesson) => (
+                            <div
+                              key={lesson.id}
+                              className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border-2 transition-all hover:shadow-lg ${
+                                lesson.completed
+                                  ? 'bg-emerald-900/30 border-emerald-600/50'
+                                  : 'bg-slate-700/50 border-slate-600 hover:border-blue-500/50'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                <Button
+                                  variant={lesson.completed ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={() => toggleLesson(lesson.id)}
+                                  className={`shrink-0 ${lesson.completed ? "bg-emerald-600 hover:bg-emerald-700 border-0" : "bg-slate-600 hover:bg-slate-500 border-slate-500 text-white"}`}
+                                >
+                                  {lesson.completed ? (
+                                    <CheckCircle2 className="h-4 w-4" />
+                                  ) : (
+                                    <BookOpen className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className={`font-semibold text-sm sm:text-base break-words ${lesson.completed ? 'text-emerald-300' : 'text-white'}`}>
+                                    {lesson.title}
+                                  </h4>
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 mt-1">
+                                    <Badge variant="outline" className={`${getDifficultyColor(lesson.difficulty)} text-white border-0 text-xs`}>
+                                      {lesson.difficulty}
+                                    </Badge>
+                                    <span className="text-xs sm:text-sm text-slate-400">
+                                      {lesson.estimated_hours}h estimated
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                                {lesson.completed && (
+                                  <motion.div 
+                                    className="text-emerald-400 font-semibold text-xs sm:text-sm text-center sm:mr-2"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 200 }}
+                                  >
+                                    ✅ Completed
+                                  </motion.div>
+                                )}
+                                
+                                <div className="flex gap-2">
+                                  {/* Code Practice Button */}
+                                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="flex-1 sm:flex-initial">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => {
+                                        setSelectedLessonForPlayground(lesson);
+                                        setPlaygroundOpen(true);
+                                        setCodePlaygroundOpen(true);
+                                      }}
+                                      className="bg-purple-600 hover:bg-purple-700 border-purple-500 text-white w-full sm:w-auto"
+                                    >
+                                      <Bot className="h-4 w-4 mr-1 sm:mr-2" />
+                                      <span className="text-xs sm:text-sm">Code</span>
+                                    </Button>
+                                  </motion.div>
+                                  
+                                  <Link href={`/lesson/${lesson.id}`} className="flex-1 sm:flex-initial">
+                                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="w-full">
+                                      <Button variant="outline" size="sm" className="bg-blue-600 hover:bg-blue-700 border-blue-500 text-white w-full sm:w-auto">
+                                        <BookOpen className="h-4 w-4 mr-1 sm:mr-2" />
+                                        <span className="text-xs sm:text-sm">Study</span>
+                                        <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />
+                                      </Button>
+                                    </motion.div>
+                                  </Link>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Motivational Footer */}
