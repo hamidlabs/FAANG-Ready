@@ -35,9 +35,25 @@ export default function ContentWithNotesImproved({ content, lessonId }: ContentW
 
   useEffect(() => {
     if (notes.length > 0 && contentRef.current) {
-      highlightNotedText();
+      // Add a small delay to ensure DOM is ready
+      const timeoutId = setTimeout(() => {
+        highlightNotedText();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [notes, content]);
+
+  // Re-highlight when modal closes
+  useEffect(() => {
+    if (!isModalOpen && notes.length > 0 && contentRef.current) {
+      const timeoutId = setTimeout(() => {
+        highlightNotedText();
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isModalOpen, notes]);
 
   const fetchNotes = async () => {
     try {
@@ -54,6 +70,17 @@ export default function ContentWithNotesImproved({ content, lessonId }: ContentW
   const highlightNotedText = () => {
     if (!contentRef.current) return;
 
+    // Clear existing highlights first
+    const existingHighlights = contentRef.current.querySelectorAll('[data-note-highlight]');
+    existingHighlights.forEach(highlight => {
+      const parent = highlight.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(highlight.textContent || ''), highlight);
+        parent.normalize();
+      }
+    });
+
+    // Get fresh text nodes after clearing highlights
     const walker = document.createTreeWalker(
       contentRef.current,
       NodeFilter.SHOW_TEXT,
@@ -65,16 +92,6 @@ export default function ContentWithNotesImproved({ content, lessonId }: ContentW
     while (node = walker.nextNode()) {
       textNodes.push(node as Text);
     }
-
-    // Clear existing highlights
-    const existingHighlights = contentRef.current.querySelectorAll('[data-note-highlight]');
-    existingHighlights.forEach(highlight => {
-      const parent = highlight.parentNode;
-      if (parent) {
-        parent.replaceChild(document.createTextNode(highlight.textContent || ''), highlight);
-        parent.normalize();
-      }
-    });
 
     // Sort notes by text length (longest first) to avoid conflicts
     const sortedNotes = [...notes].sort((a, b) => b.selected_text.length - a.selected_text.length);
@@ -252,7 +269,11 @@ export default function ContentWithNotesImproved({ content, lessonId }: ContentW
 
       <NoteModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setCurrentNote(null);
+          setSelectedText('');
+        }}
         selectedText={selectedText}
         lessonId={lessonId}
         existingNote={currentNote}
