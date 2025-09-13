@@ -9,6 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Note {
   id: number;
@@ -69,7 +71,11 @@ export default function NoteIndicator({ note, onClick }: NoteIndicatorProps) {
             </div>
             <div>
               <p className="text-xs text-slate-400 mb-2">Note:</p>
-              <p className="text-sm leading-relaxed">{truncateText(note.note_content, 150)}</p>
+              <div className="text-sm leading-relaxed prose prose-invert prose-xs max-w-none prose-p:mb-2 prose-headings:text-white prose-code:text-green-400 prose-code:bg-slate-700 prose-code:px-1 prose-code:rounded prose-strong:text-white">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {truncateText(note.note_content, 150)}
+                </ReactMarkdown>
+              </div>
             </div>
             <p className="text-xs text-slate-500 pt-2 border-t border-slate-600">
               {formatDate(note.updated_at)}

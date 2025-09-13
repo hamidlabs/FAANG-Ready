@@ -11,7 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Save, X, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Save, X, Trash2, Edit3, Eye } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 
 interface Note {
   id: number;
@@ -43,10 +47,13 @@ export default function NoteModal({
   const [noteContent, setNoteContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [activeTab, setActiveTab] = useState('write');
 
   useEffect(() => {
     if (isOpen) {
       setNoteContent(existingNote?.note_content || '');
+      // Set tab based on whether it's a new note or editing existing
+      setActiveTab(existingNote ? 'preview' : 'write');
     }
   }, [isOpen, existingNote]);
 
@@ -81,6 +88,7 @@ export default function NoteModal({
 
   const handleClose = () => {
     setNoteContent('');
+    setActiveTab('write');
     onClose();
   };
 
@@ -105,19 +113,123 @@ export default function NoteModal({
             </p>
           </div>
 
-          {/* Note Content */}
+          {/* Note Content with MDX Editor */}
           <div>
-            <label htmlFor="note-content" className="text-sm font-medium text-slate-300 block mb-2">
+            <label className="text-sm font-medium text-slate-300 block mb-3">
               Your note:
             </label>
-            <Textarea
-              id="note-content"
-              placeholder="Write your note here..."
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
-              className="min-h-[160px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-base leading-relaxed"
-              autoFocus
-            />
+
+            {existingNote ? (
+              // For existing notes: show tabs with preview as default
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 bg-slate-700/50">
+                  <TabsTrigger
+                    value="preview"
+                    className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-300"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    Preview
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="write"
+                    className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-300"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    Edit
+                  </TabsTrigger>
+                </TabsList>
+
+              <TabsContent value="write" className="mt-3">
+                <Textarea
+                  id="note-content"
+                  placeholder="Write your note using Markdown/MDX...
+
+Examples:
+# Heading
+**Bold text**
+*Italic text*
+- List item
+```javascript
+code block
+```
+> Blockquote"
+                  value={noteContent}
+                  onChange={(e) => setNoteContent(e.target.value)}
+                  className="min-h-[200px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
+                  autoFocus
+                />
+              </TabsContent>
+
+              <TabsContent value="preview" className="mt-3">
+                <div className="h-[200px] bg-slate-700/50 border border-slate-600 rounded-md p-4 overflow-y-auto">
+                  {noteContent.trim() ? (
+                    <div className="prose prose-invert prose-sm max-w-none
+                                  prose-headings:text-white prose-headings:font-bold
+                                  prose-p:text-slate-300 prose-p:leading-relaxed prose-p:mb-3
+                                  prose-strong:text-white prose-strong:font-semibold
+                                  prose-code:bg-slate-800 prose-code:text-green-400 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-xs prose-code:font-medium
+                                  prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-600 prose-pre:overflow-x-auto prose-pre:text-sm
+                                  prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:bg-slate-800/30 prose-blockquote:pl-3 prose-blockquote:py-2
+                                  prose-ul:text-slate-300 prose-ol:text-slate-300 prose-ul:mb-3 prose-ol:mb-3
+                                  prose-li:text-slate-300 prose-li:my-1
+                                  prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        rehypePlugins={[rehypeHighlight]}
+                        components={{
+                          code: ({inline, children, className, ...props}: any) => {
+                            if (inline) {
+                              return (
+                                <code className="bg-slate-800 text-green-400 px-2 py-1 rounded text-xs font-medium font-mono">
+                                  {children}
+                                </code>
+                              );
+                            }
+                            return (
+                              <code className={className} {...props}>
+                                {children}
+                              </code>
+                            );
+                          },
+                          pre: ({children}: any) => (
+                            <pre className="bg-slate-900 p-3 rounded overflow-x-auto border border-slate-600">
+                              {children}
+                            </pre>
+                          ),
+                        }}
+                      >
+                        {noteContent}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="text-slate-400 italic text-center py-8">
+                      Nothing to preview. Start writing in the Write tab to see your formatted note here.
+                    </p>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+            ) : (
+              // For new notes: show only write interface
+              <Textarea
+                id="note-content-new"
+                placeholder="Write your note using Markdown/MDX...
+
+Examples:
+# Heading
+**Bold text**
+*Italic text*
+- List item
+```javascript
+code block
+```
+> Blockquote"
+                value={noteContent}
+                onChange={(e) => setNoteContent(e.target.value)}
+                className="min-h-[200px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
+                autoFocus
+              />
+            )}
           </div>
         </div>
 
