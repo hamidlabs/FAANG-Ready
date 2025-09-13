@@ -86,7 +86,7 @@ export default function NoteModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] bg-slate-800 border-slate-700">
+      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] bg-slate-800 border-slate-700">
         <DialogHeader>
           <DialogTitle className="text-white">
             {existingNote ? 'Edit Note' : 'Take a Note'}
@@ -98,9 +98,9 @@ export default function NoteModal({
 
         <div className="space-y-4">
           {/* Selected Text Display */}
-          <div className="bg-slate-700/50 p-3 rounded-md border border-slate-600">
-            <p className="text-sm text-slate-400 mb-2">Selected text:</p>
-            <p className="text-slate-300 italic text-sm leading-relaxed">
+          <div className="bg-slate-700/50 p-4 rounded-md border border-slate-600">
+            <p className="text-sm text-slate-400 mb-3">Selected text:</p>
+            <p className="text-slate-300 italic text-base leading-relaxed max-h-32 overflow-y-auto">
               "{selectedText}"
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function NoteModal({
               placeholder="Write your note here..."
               value={noteContent}
               onChange={(e) => setNoteContent(e.target.value)}
-              className="min-h-[120px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500"
+              className="min-h-[160px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-base leading-relaxed"
               autoFocus
             />
           </div>

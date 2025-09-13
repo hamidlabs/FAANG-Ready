@@ -61,17 +61,17 @@ export default function NoteIndicator({ note, onClick }: NoteIndicatorProps) {
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent className="bg-slate-800 border-slate-700 text-slate-200 max-w-sm">
-          <div className="space-y-2">
+        <TooltipContent className="bg-slate-800 border-slate-700 text-slate-200 max-w-md">
+          <div className="space-y-3">
             <div>
-              <p className="text-xs text-slate-400 mb-1">Selected text:</p>
-              <p className="text-sm italic">"{truncateText(note.selected_text, 60)}"</p>
+              <p className="text-xs text-slate-400 mb-2">Selected text:</p>
+              <p className="text-sm italic leading-relaxed">"{truncateText(note.selected_text, 80)}"</p>
             </div>
             <div>
-              <p className="text-xs text-slate-400 mb-1">Note:</p>
-              <p className="text-sm">{truncateText(note.note_content, 100)}</p>
+              <p className="text-xs text-slate-400 mb-2">Note:</p>
+              <p className="text-sm leading-relaxed">{truncateText(note.note_content, 150)}</p>
             </div>
-            <p className="text-xs text-slate-500 pt-1 border-t border-slate-600">
+            <p className="text-xs text-slate-500 pt-2 border-t border-slate-600">
               {formatDate(note.updated_at)}
             </p>
           </div>
