@@ -34,6 +34,20 @@ CREATE TABLE IF NOT EXISTS user_stats (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Notes table for storing user notes on lesson content
+CREATE TABLE IF NOT EXISTS notes (
+  id SERIAL PRIMARY KEY,
+  lesson_id VARCHAR(200) NOT NULL, -- Lesson ID from file discovery
+  selected_text TEXT NOT NULL, -- The text that was selected to create the note
+  note_content TEXT NOT NULL, -- The actual note content
+  position_data JSONB, -- Store position information as JSON
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index for faster queries
+CREATE INDEX IF NOT EXISTS idx_notes_lesson_id ON notes(lesson_id);
+
 -- Initialize user stats
-INSERT INTO user_stats (current_streak, longest_streak, total_lessons_completed, total_hours_studied) 
+INSERT INTO user_stats (current_streak, longest_streak, total_lessons_completed, total_hours_studied)
 VALUES (0, 0, 0, 0) ON CONFLICT DO NOTHING;
