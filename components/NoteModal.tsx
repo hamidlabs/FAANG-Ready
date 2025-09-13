@@ -94,28 +94,25 @@ export default function NoteModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] bg-slate-800 border-slate-700">
-        <DialogHeader>
-          <DialogTitle className="text-white">
-            {existingNote ? 'Edit Note' : 'Take a Note'}
+      <DialogContent className="sm:max-w-[700px] lg:max-w-[800px] max-h-[90vh] bg-slate-800 border-slate-700">
+        <DialogHeader className="pb-3">
+          <DialogTitle className="text-lg text-white">
+            {existingNote ? 'Edit Note' : 'Take Note'}
           </DialogTitle>
-          <DialogDescription className="text-slate-300">
-            {existingNote ? 'Update your note for the selected text.' : 'Add a note for the selected text.'}
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Selected Text Display */}
-          <div className="bg-slate-700/50 p-4 rounded-md border border-slate-600">
-            <p className="text-sm text-slate-400 mb-3">Selected text:</p>
-            <p className="text-slate-300 italic text-base leading-relaxed max-h-32 overflow-y-auto">
+          <div className="bg-slate-700/50 p-3 rounded-md border border-slate-600">
+            <p className="text-xs text-slate-400 mb-2">Selected text:</p>
+            <p className="text-slate-300 italic text-sm leading-relaxed max-h-24 overflow-y-auto">
               "{selectedText}"
             </p>
           </div>
 
           {/* Note Content with MDX Editor */}
           <div>
-            <label className="text-sm font-medium text-slate-300 block mb-3">
+            <label className="text-xs font-medium text-slate-400 block mb-2">
               Your note:
             </label>
 
@@ -155,13 +152,13 @@ code block
 > Blockquote"
                   value={noteContent}
                   onChange={(e) => setNoteContent(e.target.value)}
-                  className="min-h-[200px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
+                  className="min-h-[280px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
                   autoFocus
                 />
               </TabsContent>
 
               <TabsContent value="preview" className="mt-3">
-                <div className="h-[200px] bg-slate-700/50 border border-slate-600 rounded-md p-4 overflow-y-auto">
+                <div className="h-[280px] bg-slate-700/50 border border-slate-600 rounded-md p-4 overflow-y-auto">
                   {noteContent.trim() ? (
                     <div className="prose prose-invert prose-sm max-w-none
                                   prose-headings:text-white prose-headings:font-bold
@@ -226,7 +223,7 @@ code block
 > Blockquote"
                 value={noteContent}
                 onChange={(e) => setNoteContent(e.target.value)}
-                className="min-h-[200px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
+                className="min-h-[280px] bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm font-mono leading-relaxed resize-none"
                 autoFocus
               />
             )}
